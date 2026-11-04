@@ -1,5 +1,6 @@
 package cz.gates.skeldal
 
+import android.content.pm.ActivityInfo
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -86,11 +87,24 @@ class GameActivity : SDLActivity() {
         super.onDestroy()
     }
 
+    @Volatile private var allowPortrait = true
+
+    private fun orientation() =
+        if (allowPortrait) ActivityInfo.SCREEN_ORIENTATION_FULL_USER   // respects the system rotation lock
+        else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+
+    /** SDL requests an orientation when it creates the window; the launcher setting decides instead. */
+    override fun setOrientationBis(w: Int, h: Int, resizable: Boolean, hint: String) {
+        runOnUiThread { requestedOrientation = orientation() }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isFinishing) return
         val s = SettingsStore(this).load()
         touchMode = s.touchMode
+        allowPortrait = s.allowPortrait
+        requestedOrientation = orientation()
         if (s.controllerEnabled) extraSlots = ExtraButtons.slots(s.extraButtons)
 
         val view = TouchOverlayView(

@@ -1436,7 +1436,7 @@ SDL_Rect SDLContext::get_window_aspect_rect() const {
         w.w = 640 * k;
         w.h = 480 * k;
         w.x = (ww - w.w) / 2;
-        w.y = (wh - w.h) / 2;
+        w.y = (wh > ww) ? (wh - w.h) / 5 : (wh - w.h) / 2;
     } else if (aspect_x && aspect_y) {
         int apw  = wh * aspect_x / aspect_y;
         int aph =  ww * aspect_y / aspect_x;
@@ -1453,6 +1453,8 @@ SDL_Rect SDLContext::get_window_aspect_rect() const {
         w.w = fw;
         w.x = (ww - fw)/2;
         w.y = (wh - fh)/2;
+        // portrait (phone held upright): picture in the upper part, the space below is for the touch controls
+        if (wh > ww) w.y = (wh - fh) / 5;
     } else {
         w.x = 0;
         w.y = 0;
@@ -1464,7 +1466,7 @@ SDL_Rect SDLContext::get_window_aspect_rect() const {
         int nw = w.w * _picture_scale / 100;
         int nh = w.h * _picture_scale / 100;
         w.x += (w.w - nw) / 2;
-        w.y += (w.h - nh) / 2;
+        w.y += (wh > ww) ? 0 : (w.h - nh) / 2;
         w.w = nw;
         w.h = nh;
     }

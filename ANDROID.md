@@ -88,6 +88,11 @@ Kontrola instalace (podle zdrojového kódu enginu):
   Když ji zavřete, nahoře uprostřed je tlačítko „⌨ Klávesnice“, které ji otevře
   znovu. Klepnutí do hry zůstávají myší.
 
+- **Na výšku**: volba „Povolit hru na výšku“ (výchozí zapnuto, respektuje zámek otáčení
+  systému). Obraz je nahoře, místo pod ním je pro dotykové ovládání. Vypnuto = jen na šířku.
+- **Pruhy ve videích**: původní hra kreslí každý druhý řádek videa tmavší; na Androidu je to
+  ve výchozím stavu vypnuté (`[video] video_scanlines=`).
+
 Aplikace má ID balíčku `cz.gates.skeldal`.
 
 ## Umístění dat v zařízení

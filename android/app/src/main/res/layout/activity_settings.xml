@@ -70,6 +70,11 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_video_scanlines" />
 
+        <Switch
+            android:id="@+id/switch_allow_portrait"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_allow_portrait" />
+
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_crt" />
