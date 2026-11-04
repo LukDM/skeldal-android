@@ -32,7 +32,7 @@ Minimální verze: **Android 8.0**. Telefony i tablety, na šířku.
 
 ## Instalace
 
-1. Stáhněte APK ze stránky [Releases](../../releases) (až bude k dispozici) nebo si ho sestavte.
+1. Stáhněte APK ze stránky [Releases](../../releases) nebo si ho sestavte.
 2. Při instalaci povolte „Instalovat neznámé aplikace“.
 3. V aplikaci zvolte **Importovat hru** a vyberte složku nebo ZIP s daty původní hry.
 
