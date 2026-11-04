@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 6-11 Auto Backup (Google Drive): only savegames and settings, never the game data. -->
+<full-backup-content>
+    <include domain="file" path="saves/" />
+    <include domain="sharedpref" path="settings.xml" />
+</full-backup-content>

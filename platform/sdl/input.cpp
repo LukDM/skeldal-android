@@ -13,6 +13,7 @@ char get_capslock_state() {
 }
 uint32_t _bios_keybrd(int mode) {
     if (mode == _KEYBRD_READY) {
+        game_wait_while_inactive();   // keyboard polling loops (e.g. video) stop while inactive
         return get_sdl_global_context().is_keyboard_ready()?1:0;
     } else if (mode == _KEYBRD_READ) {
         return get_sdl_global_context().pop_keyboard_code();
@@ -34,6 +35,7 @@ void get_ms_event(MS_EVENT *event) {
 }
 
 void ShareCPU() {
+    game_wait_while_inactive();
     if (q_is_mastertask()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -75,6 +77,7 @@ void init_joystick(const INI_CONFIG_SECTION *section) {
 
     cfg.enabled = ini_get_boolean(section, "enabled", 1) != 0;
     cfg.swap_axis = ini_get_boolean(section, "swap_sticks", 0) != 0;
+    cfg.slow_cursor_with_mod = ini_get_boolean(section, "slow_cursor_with_mod", 1) != 0;
     cfg.walk_deadzone = ini_get_int(section,"walk_deadzone", 0x4000);
     cfg.cursor_deadzone = ini_get_int(section,"cursor_deadzone", 0x800);
     auto bcount = std::distance(std::begin(cfg.buttons),std::end(cfg.buttons));
@@ -99,6 +102,10 @@ void init_joystick(const INI_CONFIG_SECTION *section) {
         }
     }
     get_sdl_global_context().configure_controller(cfg);
+}
+
+void controller_virtual_button(int button, char pressed) {
+    SDLContext::push_virtual_button(button, pressed != 0);
 }
 
 char is_joystick_used() {

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(skeldal)
 
-# Najít SDL2 knihovnu
-find_package(SDL2 REQUIRED)
+# Najít SDL2 knihovnu (pro Android ji dodává android/app/src/main/cpp/CMakeLists.txt)
+if(NOT ANDROID)
+    find_package(SDL2 REQUIRED)
+endif()
 
 # ---------------------------------------------------------------------------
 # Achievements backend
@@ -26,6 +28,11 @@ set(STEAMWORKS_SDK_DIR "" CACHE PATH "Path to Steamworks SDK directory")
 set(GALAXY_SDK_DIR "" CACHE PATH "Path to GOG Galaxy SDK directory")
 set(GOG_CREDENTIALS_FILE "" CACHE FILEPATH "CMake file defining GOG_CLIENT_ID and GOG_CLIENT_SECRET")
 
+# Android: no Steam/GOG backends (normal variable overrides the cache value above)
+if(ANDROID)
+    set(ACHIEVEMENTS_BACKEND "none")
+endif()
+
 # Older versions of this file FORCE-cached the literal "none" into
 # STEAMWORKS_SDK_DIR when no SDK was found. CMake treats that string as true,
 # so an existing build directory would resolve to the steam backend and then
@@ -34,12 +41,12 @@ set(STEAMWORKS_DIR "")
 if(STEAMWORKS_SDK_DIR AND NOT STEAMWORKS_SDK_DIR STREQUAL "none")
     set(STEAMWORKS_DIR "${STEAMWORKS_SDK_DIR}")
 endif()
-if(NOT STEAMWORKS_DIR AND EXISTS "${CMAKE_SOURCE_DIR}/external/steamworks/public/steam/steam_api.h")
-    set(STEAMWORKS_DIR "${CMAKE_SOURCE_DIR}/external/steamworks")
+if(NOT STEAMWORKS_DIR AND EXISTS "${PROJECT_SOURCE_DIR}/external/steamworks/public/steam/steam_api.h")
+    set(STEAMWORKS_DIR "${PROJECT_SOURCE_DIR}/external/steamworks")
 endif()
 set(GALAXY_DIR "${GALAXY_SDK_DIR}")
-if(NOT GALAXY_DIR AND EXISTS "${CMAKE_SOURCE_DIR}/external/galaxy/Include/galaxy/GalaxyApi.h")
-    set(GALAXY_DIR "${CMAKE_SOURCE_DIR}/external/galaxy")
+if(NOT GALAXY_DIR AND EXISTS "${PROJECT_SOURCE_DIR}/external/galaxy/Include/galaxy/GalaxyApi.h")
+    set(GALAXY_DIR "${PROJECT_SOURCE_DIR}/external/galaxy")
 endif()
 
 if(ACHIEVEMENTS_BACKEND STREQUAL "auto")
@@ -67,10 +74,10 @@ elseif(ACHIEVEMENTS_BACKEND_RESOLVED STREQUAL "galaxy")
         message(FATAL_ERROR "GOG Galaxy SDK not found. Extract it to external/galaxy or set GALAXY_SDK_DIR")
     endif()
     if(NOT GOG_CREDENTIALS_FILE)
-        if(EXISTS "${CMAKE_SOURCE_DIR}/gog_credentials.cmake")
-            set(GOG_CREDENTIALS_FILE "${CMAKE_SOURCE_DIR}/gog_credentials.cmake")
-        elseif(EXISTS "${CMAKE_SOURCE_DIR}/../gog_credentials.cmake")
-            set(GOG_CREDENTIALS_FILE "${CMAKE_SOURCE_DIR}/../gog_credentials.cmake")
+        if(EXISTS "${PROJECT_SOURCE_DIR}/gog_credentials.cmake")
+            set(GOG_CREDENTIALS_FILE "${PROJECT_SOURCE_DIR}/gog_credentials.cmake")
+        elseif(EXISTS "${PROJECT_SOURCE_DIR}/../gog_credentials.cmake")
+            set(GOG_CREDENTIALS_FILE "${PROJECT_SOURCE_DIR}/../gog_credentials.cmake")
         endif()
     endif()
     if(NOT GOG_CREDENTIALS_FILE OR NOT EXISTS "${GOG_CREDENTIALS_FILE}")
@@ -80,7 +87,7 @@ elseif(ACHIEVEMENTS_BACKEND_RESOLVED STREQUAL "galaxy")
     if(NOT GOG_CLIENT_ID OR NOT GOG_CLIENT_SECRET OR GOG_CLIENT_ID MATCHES "^PUT_" OR GOG_CLIENT_SECRET MATCHES "^PUT_")
         message(FATAL_ERROR "GOG_CLIENT_ID / GOG_CLIENT_SECRET are not set in ${GOG_CREDENTIALS_FILE}")
     endif()
-    configure_file("${CMAKE_SOURCE_DIR}/platform/gog_credentials.in.h" "${CMAKE_BINARY_DIR}/gog_credentials.h" @ONLY)
+    configure_file("${PROJECT_SOURCE_DIR}/platform/gog_credentials.in.h" "${CMAKE_BINARY_DIR}/gog_credentials.h" @ONLY)
     add_compile_definitions(GALAXY_ENABLED)
     include_directories(${GALAXY_DIR}/Include)
     message(STATUS "GOG credentials: ${GOG_CREDENTIALS_FILE}")
@@ -97,10 +104,14 @@ if (MSVC)
     set(STANDARD_LIBRARIES "")
 else()
     add_compile_options(-Wall -Wextra -Werror -Wno-unused-result -Wno-unused-parameter -Wno-unused-value -Wno-extern-c-compat -funsigned-char)
-    set(STANDARD_LIBRARIES "pthread")
+    if(ANDROID)
+        set(STANDARD_LIBRARIES "")   # pthread is part of bionic libc
+    else()
+        set(STANDARD_LIBRARIES "pthread")
+    endif()
 endif()
 
-set(VERSION_IN "${CMAKE_SOURCE_DIR}/version.in.h")
+set(VERSION_IN "${PROJECT_SOURCE_DIR}/version.in.h")
 set(VERSION_OUT "${CMAKE_BINARY_DIR}/version.h")
 
 find_package(Git QUIET)
@@ -108,7 +119,7 @@ find_package(Git QUIET)
 if(GIT_FOUND)
     execute_process(
         COMMAND ${GIT_EXECUTABLE} describe --tags --always
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         RESULT_VARIABLE GIT_RESULT
@@ -130,16 +141,24 @@ endif()
 message(STATUS "Version string: ${APP_VERSION}")
 configure_file(${VERSION_IN} ${VERSION_OUT} @ONLY)
 
+enable_testing()
+
 include_directories(${CMAKE_BINARY_DIR})
 
 include_directories(.)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+if(NOT ANDROID)
+    # Android: AGP chooses the output directories for the native libraries
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+endif()
 
 include_directories( ${SDL2_INCLUDE_DIRS})
 add_subdirectory(libs)
 add_subdirectory(platform)
 add_subdirectory(game)
-add_subdirectory(tools)
+if(NOT ANDROID)
+    # tools are host executables (not needed in the Android build)
+    add_subdirectory(tools)
+endif()

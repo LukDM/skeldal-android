@@ -8,6 +8,7 @@
 #include <platform/sound.h>
 
 #include "strlite.h"
+#include "mouse.h"
 
 
 
@@ -136,6 +137,13 @@ static void PlayMGFFile(const void *file, MGIF_PROC proc,int ypos,char full)
   picture[2]=15;
   memset(picture+3,0,320*180*2);
   anim_render_buffer=picture+3;
+  {
+      /* the video is stretched to 640x360 drawing every second line only; clear the target
+         so the other lines are black instead of leftovers of the previous screen */
+      int rows = 360;
+      if (ypos + rows > 480) rows = 480 - ypos;
+      if (ypos >= 0 && rows > 0) memset(GetScreenAdr()+ypos*scr_linelen2, 0, (size_t)rows*scr_linelen2*2);
+  }
   file=open_mgif(file);
   if (file==NULL) return;
   MGIF_HEADER_T *hdr =(MGIF_HEADER_T *)file;
@@ -153,7 +161,12 @@ static void PlayMGFFile(const void *file, MGIF_PROC proc,int ypos,char full)
       } else if (_bios_keybrd(_KEYBRD_READY)) {
           _bios_keybrd(_KEYBRD_READ);
           break;
-	  }
+	  } else {
+          // a mouse click (or a tap on a touch screen) skips the video too
+          MS_EVENT ms;
+          get_ms_event(&ms);
+          if (ms.event_type & (MS_EVENT_MOUSE_LPRESS | MS_EVENT_MOUSE_RPRESS)) break;
+      }
 	}
   close_mgif(file);
   DoneVideoSound(sound);

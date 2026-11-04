@@ -78,6 +78,17 @@ if(WIN32)
 
     message(STATUS "Building for Windows")
 
+elseif(ANDROID)
+    # Android: native library loaded by SDLActivity (see android/ directory)
+    target_sources(skeldal_platform PRIVATE
+        android/save_folder.cpp
+        linux/map_file.cpp
+    )
+    add_library(skeldal SHARED android/app_start.cpp)
+    target_compile_definitions(skeldal_platform PRIVATE PLATFORM_ANDROID)
+    target_link_libraries(skeldal ${all_libs} log android)
+    message(STATUS "Building for Android")
+
 elseif(UNIX AND NOT APPLE)
     target_sources(skeldal_platform PRIVATE
         linux/save_folder.cpp
@@ -130,3 +141,11 @@ endif()
 set_property(TARGET skeldal_platform PROPERTY CXX_STANDARD 20)
 
  add_subdirectory(sdl)
+
+# ---- tests (desktop only): ctest ------------------------------------------------------------
+if(NOT ANDROID)
+    add_executable(timer_pause_test tests/timer_pause_test.cpp timer.cpp)
+    set_property(TARGET timer_pause_test PROPERTY CXX_STANDARD 20)
+    target_link_libraries(timer_pause_test ${STANDARD_LIBRARIES})
+    add_test(NAME timer_pause_test COMMAND timer_pause_test)
+endif()

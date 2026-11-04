@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF1B1410"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            style="@style/SettingsHeader"
+            android:text="@string/settings_title" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_display" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_scaling" />
+
+        <Spinner
+            android:id="@+id/spinner_scaling"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_scaling_hint" />
+
+        <TextView
+            android:id="@+id/label_picture_scale"
+            style="@style/SettingsLabel" />
+
+        <SeekBar
+            android:id="@+id/seek_picture_scale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:foreground="@drawable/focus_frame"
+            android:max="50" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_picture_scale_hint" />
+
+        <Switch
+            android:id="@+id/switch_fullscreen"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_fullscreen" />
+
+        <Switch
+            android:id="@+id/switch_smooth"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_smooth" />
+
+        <Switch
+            android:id="@+id/switch_vsync"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_vsync" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_crt" />
+
+        <Spinner
+            android:id="@+id/spinner_crt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_crt_hint" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_touch" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_touch_mode" />
+
+        <Spinner
+            android:id="@+id/spinner_touch_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <TextView
+            android:id="@+id/label_touch_size"
+            style="@style/SettingsLabel" />
+
+        <SeekBar
+            android:id="@+id/seek_touch_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:foreground="@drawable/focus_frame"
+            android:max="150" />
+
+        <TextView
+            android:id="@+id/label_touch_opacity"
+            style="@style/SettingsLabel" />
+
+        <SeekBar
+            android:id="@+id/seek_touch_opacity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:foreground="@drawable/focus_frame"
+            android:max="90" />
+
+        <Switch
+            android:id="@+id/switch_left_handed"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_left_handed" />
+
+        <Switch
+            android:id="@+id/switch_centered"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_centered" />
+
+        <Button
+            android:id="@+id/btn_touch_layout"
+            style="@style/LauncherButton"
+            android:text="@string/settings_touch_layout" />
+
+        <Switch
+            android:id="@+id/switch_dpad"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_dpad" />
+
+        <Switch
+            android:id="@+id/switch_btn_menu"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_btn_menu" />
+
+        <Switch
+            android:id="@+id/switch_btn_map"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_btn_map" />
+
+        <Switch
+            android:id="@+id/switch_btn_action"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_btn_action" />
+
+        <Switch
+            android:id="@+id/switch_btn_battle"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_btn_battle" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_optional_buttons" />
+
+        <LinearLayout
+            android:id="@+id/optional_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <Switch
+            android:id="@+id/switch_longpress"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_longpress" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_touch_hint" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_controller" />
+
+        <TextView
+            android:id="@+id/label_controller_info"
+            style="@style/SettingsHint" />
+
+        <Switch
+            android:id="@+id/switch_controller"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_controller_enabled" />
+
+        <Switch
+            android:id="@+id/switch_swap_sticks"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_swap_sticks" />
+
+        <Button
+            android:id="@+id/btn_controller_mapping"
+            style="@style/LauncherButton"
+            android:text="@string/settings_controller_mapping" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_controller_hint" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_game" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_language" />
+
+        <Spinner
+            android:id="@+id/spinner_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <TextView
+            android:id="@+id/label_language_hint"
+            style="@style/SettingsHint" />
+
+        <Switch
+            android:id="@+id/switch_autosave_bg"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_autosave_bg" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_autosave_bg_hint" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_data" />
+
+        <Button
+            android:id="@+id/btn_export_log"
+            style="@style/LauncherButton"
+            android:text="@string/settings_export_log" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_export_log_hint" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_apply_hint" />
+
+        <Button
+            android:id="@+id/btn_reset"
+            style="@style/LauncherButton"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_reset" />
+
+        <Button
+            android:id="@+id/btn_back"
+            style="@style/LauncherButton"
+            android:text="@string/btn_close" />
+    </LinearLayout>
+</ScrollView>

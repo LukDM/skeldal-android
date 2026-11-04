@@ -37,6 +37,11 @@ public:
         int aspect_x;
         int aspect_y;
         float cursor_size;
+        bool integer_scale;   ///< scale only by whole multiples of 640x480 (sharp pixels)
+        bool vsync;           ///< synchronize presentation with the display refresh
+        bool pause_on_focus_loss; ///< pause the game while the window has no focus
+        bool autosave_on_background; ///< press F5 (autosave) when the app goes to the background
+        int picture_scale;           ///< size of the picture in percent of the fitted size (50-100)
     };
 
     struct AudioConfig {
@@ -79,7 +84,8 @@ public:
         F11,
         F12,
         backspace,
-        mod_key
+        mod_key,
+        slow_cursor     ///< while held, the right stick moves the cursor slowly (precise aiming)
     };
 
     static JoystickButton button_from_string(std::string_view s);
@@ -91,6 +97,7 @@ public:
         short cursor_deadzone;
         JoystickButton buttons[32];
         JoystickButton buttons_mod[32];
+        bool slow_cursor_with_mod;   ///< holding the modifier also slows the cursor down
 
     };
 
@@ -103,6 +110,9 @@ public:
     void set_window_icon(const void *icon_data, size_t icon_size);
 
     void configure_controller(const JoystickConfig &cfg);
+
+    /// queue a controller button event from any thread (see controller_virtual_button)
+    static void push_virtual_button(int button, bool pressed);
 
 
     AudioInfo init_audio(const AudioConfig &config, SDL_AudioCallback cb, void *cb_ctx);
@@ -223,13 +233,23 @@ protected:
     mutable std::mutex _mx;
     int aspect_x = 4;
     int aspect_y = 3;
+    bool _integer_scale = false;
+    int _picture_scale = 100;
+    bool _pause_on_focus_loss = false;
+    bool _autosave_on_background = false;
+    std::atomic<bool> _in_background{false};
+    static int SDLCALL app_event_watch(void *ctx, SDL_Event *e);
     CrtFilterType _crt_filter= CrtFilterType::autoselect;
     bool _enable_crt = true;
     bool _disable_crt_tmp = false;
     std::function<void()> _quit_callback;
     JoystickConfig _jcontrol_map;
     bool _jcontrol_mod_key = false;
+    bool _jcontrol_slow = false;
+    double _cursor_acc_x = 0;   // sub-pixel remainder of the slow cursor
+    double _cursor_acc_y = 0;
     bool _jcontrol_used = false;
+    bool _trigger_down[2] = {false, false};   // left / right analog trigger as buttons
 
     std::unique_ptr<SDL_Window, SDL_Deleter> _window;
     std::unique_ptr<SDL_Renderer, SDL_Deleter> _renderer;
@@ -273,7 +293,7 @@ protected:
 
 
 
-    void event_loop(std::stop_token stp);
+    void event_loop();
     void update_screen(bool force_refresh = false);
 
 
@@ -290,6 +310,9 @@ protected:
     std::string_view pop_data(QueueIter &iter, std::size_t size);
 
     SDL_Rect get_window_aspect_rect() const;
+    SDL_Point window_to_output(const SDL_Point &pt) const;
+    void set_text_input(bool active);
+    bool _text_input_active = false;
     static SDL_Rect to_window_rect(const SDL_Rect &winrc, const SDL_Rect &source_rect) ;
     static SDL_Point to_window_point(const SDL_Rect &win_rec, const SDL_Point &pt) ;
     static SDL_Point to_source_point(const SDL_Rect &win_rec, const SDL_Point &win_pt) ;

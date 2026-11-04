@@ -1,0 +1,38 @@
+Brány Skeldalu – Android port
+=============================
+
+Zdrojový kód hry (engine)
+-------------------------
+Gates of Skeldal / Brány Skeldalu – https://github.com/ondra-novak/gates_of_skeldal
+Copyright (c) 2025 Napoleon Games. Licence: MIT (soubor LICENSE v repozitáři).
+
+Herní data (grafika, zvuky, hudba, mapy, texty, videa) jsou chráněna autorským právem
+a NEJSOU součástí této aplikace. Aplikace pouze používá data, která si uživatel sám
+importuje ze své legálně získané kopie hry.
+
+Použité knihovny
+----------------
+SDL 2.30.9 (Simple DirectMedia Layer) – https://www.libsdl.org
+Copyright (C) 1997-2024 Sam Lantinga. Licence: zlib.
+  This software is provided 'as-is', without any express or implied warranty. In no event
+  will the authors be held liable for any damages arising from the use of this software.
+  Permission is granted to anyone to use this software for any purpose, including commercial
+  applications, and to alter it and redistribute it freely, subject to the following
+  restrictions:
+  1. The origin of this software must not be misrepresented; you must not claim that you
+     wrote the original software. If you use this software in a product, an acknowledgment
+     in the product documentation would be appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be misrepresented
+     as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+Kotlin Standard Library – https://kotlinlang.org
+Copyright JetBrains s.r.o. and Kotlin Programming Language contributors. Licence: Apache 2.0.
+
+AndroidX DocumentFile, AndroidX Annotation – https://developer.android.com/jetpack/androidx
+Copyright The Android Open Source Project. Licence: Apache 2.0.
+
+LLVM libc++ (součást Android NDK, staticky přilinkovaná)
+Licence: Apache 2.0 with LLVM Exceptions.
+
+Plné texty licence Apache 2.0: https://www.apache.org/licenses/LICENSE-2.0

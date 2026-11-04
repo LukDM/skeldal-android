@@ -1,9 +1,20 @@
+if(ANDROID)
+    # file_to_base64 is a host tool and cannot run in a cross build,
+    # so the base64 files generated from the same assets are shipped in android_prebuilt/
+    add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/default_font.base64
+                       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/android_prebuilt/default_font.base64 ${CMAKE_BINARY_DIR}/default_font.base64
+                       DEPENDS ${CMAKE_CURRENT_LIST_DIR}/android_prebuilt/default_font.base64)
+    add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/icon.base64
+                       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/android_prebuilt/icon.base64 ${CMAKE_BINARY_DIR}/icon.base64
+                       DEPENDS ${CMAKE_CURRENT_LIST_DIR}/android_prebuilt/icon.base64)
+else()
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/default_font.base64
                    COMMAND file_to_base64 ${CMAKE_CURRENT_LIST_DIR}/boldcz.fon  > ${CMAKE_BINARY_DIR}/default_font.base64
                    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/boldcz.fon)
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/icon.base64
                    COMMAND file_to_base64 ${CMAKE_CURRENT_LIST_DIR}/icon.bmp  > ${CMAKE_BINARY_DIR}/icon.base64
                    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/icon.bmp)
+endif()
 
 
 add_custom_command(

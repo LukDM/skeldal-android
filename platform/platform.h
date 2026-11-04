@@ -112,6 +112,25 @@ int get_timer_value(void);
 uint32_t get_game_tick_count(void);
 void sleep_ms(uint32_t);
 
+/// Reasons why the game is inactive (bit mask for game_set_inactive)
+#define GAME_INACTIVE_BACKGROUND 1   ///< application is in the background (mobile)
+#define GAME_INACTIVE_FOCUS 2        ///< window lost focus (only if enabled in config)
+/// Marks the game inactive / active again. While inactive the game clock is frozen and the
+/// game thread waits in game_wait_while_inactive(). Thread safe.
+void game_set_inactive(int reason, char inactive);
+/// Called from the game thread (ShareCPU, keyboard polling): blocks while the game is inactive.
+void game_wait_while_inactive(void);
+/// The game shows / leaves a text field (on mobile this opens / closes the soft keyboard).
+/// Thread safe.
+void game_text_input(char active);
+/// Platform callback when a text field opens / closes (called on the SDL event thread).
+void game_set_text_input_listener(void (*listener)(int active));
+/// Shows the soft keyboard again while a text field is open (e.g. after the user closed it).
+void game_show_keyboard(void);
+/// Mutes / unmutes the game audio (e.g. Android audio focus). Thread safe, never blocks:
+/// the change is applied by the SDL event loop.
+void game_set_audio_muted(char muted);
+
 typedef enum {
     file_type_normal = 1,
     file_type_directory = 2,
@@ -134,6 +153,20 @@ int list_files(const char *directory, int type, LIST_FILES_CALLBACK cb, void *ct
 void init_joystick(const INI_CONFIG_SECTION *section);
 char is_joystick_used();
 char is_joystick_enabled();
+
+/// Controller button numbers used by the [controller] section of skeldal.ini:
+///  0-14  standard layout (A, B, X, Y, Back, Guide, Start, L3, R3, LB, RB, D-pad)
+///  15    misc (e.g. Share / capture), 16-19 paddles, 20 touchpad click
+///  21,22 left / right analog trigger (pressed when pulled past half)
+///  23-31 extra buttons reported by the platform (see controller_virtual_button)
+#define CONTROLLER_BUTTON_LEFT_TRIGGER 21
+#define CONTROLLER_BUTTON_RIGHT_TRIGGER 22
+#define CONTROLLER_BUTTON_FIRST_EXTRA 23
+#define CONTROLLER_BUTTON_COUNT 32
+
+/// Press / release a controller button from platform code (e.g. Android buttons outside the
+/// standard layout). Thread safe, may be called from any thread.
+void controller_virtual_button(int button, char pressed);
 
 #define WM_RELOADMAP (WM_APP+215)
 #define E_RELOADMAP 40

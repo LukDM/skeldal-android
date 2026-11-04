@@ -19,7 +19,16 @@
 #include <condition_variable>
 #include <chrono>
 #include <string_view>
-#include <stop_token>
+
+static Uint32 virtual_button_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
+
+static Uint32 exit_loop_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
 
 void SDLContext::SDL_Deleter::operator ()(SDL_Window* window) {
     SDL_DestroyWindow(window);
@@ -47,33 +56,100 @@ void SDLContext::SDL_Audio_Deleter::operator()(SDL_AudioDeviceID x) {
 struct SDL_INIT_Context {
 
     SDL_INIT_Context() {
-        if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_JOYSTICK) < 0) {
+        if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_JOYSTICK|SDL_INIT_GAMECONTROLLER) < 0) {
             SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
             exit(1);
         }
-        if (SDL_NumJoysticks() > 0) {
-            if (SDL_IsGameController(0)) {
-                controller = SDL_JoystickOpen(0);
-                SDL_JoystickEventState(SDL_ENABLE);
-            }
+        for (int i = 0, n = SDL_NumJoysticks(); i < n; ++i) {
+            const char *jname = SDL_JoystickNameForIndex(i);
+            SDL_Log("Joystick %d: '%s'%s", i, jname ? jname : "?",
+                    SDL_IsGameController(i) ? " (game controller)" : "");
         }
-
+        open_first();
         inited = true;
     }
     ~SDL_INIT_Context() {
-        if (controller) SDL_JoystickClose(controller);
+        if (controller) SDL_GameControllerClose(controller);
         SDL_Quit();
     }
 
+    /// Opens the first device SDL recognizes as a game controller (standard layout:
+    /// buttons and axes are numbered as SDL_GameControllerButton / SDL_GameControllerAxis,
+    /// independent of the device). On Android the joystick list may also contain
+    /// sensors or other virtual devices, those are skipped.
+    void open_first() {
+        std::lock_guard _(mx);
+        if (controller) return;
+        for (int i = 0, n = SDL_NumJoysticks(); i < n; ++i) {
+            if (!SDL_IsGameController(i)) continue;
+            SDL_GameController *c = SDL_GameControllerOpen(i);
+            if (!c) continue;
+            const char *name = SDL_GameControllerName(c);
+            // Some phones report built-in key devices (fingerprint sensor, side keys) as game
+            // controllers. A real gamepad has a stick or a D-pad hat, i.e. at least two axes.
+            int axes = SDL_JoystickNumAxes(SDL_GameControllerGetJoystick(c));
+            if (axes < 2) {
+                SDL_Log("Ignoring '%s': not a gamepad (%d axes)", name ? name : "?", axes);
+                SDL_GameControllerClose(c);
+                continue;
+            }
+            controller = c;
+            SDL_Log("Using game controller: '%s' (%d axes)", name ? name : "?", axes);
+            break;
+        }
+    }
+
+    /// hot-plug: a controller was connected
+    void on_added() { open_first(); }
+
+    /// hot-plug: a controller was disconnected
+    void on_removed(SDL_JoystickID id) {
+        std::lock_guard _(mx);
+        if (controller && SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)) == id) {
+            SDL_Log("Game controller disconnected");
+            SDL_GameControllerClose(controller);
+            controller = nullptr;
+        }
+    }
+
+    bool is_ours(SDL_JoystickID id) {
+        std::lock_guard _(mx);
+        return controller && SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)) == id;
+    }
+
+    bool connected() {
+        std::lock_guard _(mx);
+        return controller != nullptr;
+    }
+
+    /// axis 0,1 = left stick X,Y; 2,3 = right stick X,Y (same numbering as before)
+    int axis(int idx) {
+        static const SDL_GameControllerAxis map[4] = {
+            SDL_CONTROLLER_AXIS_LEFTX, SDL_CONTROLLER_AXIS_LEFTY,
+            SDL_CONTROLLER_AXIS_RIGHTX, SDL_CONTROLLER_AXIS_RIGHTY
+        };
+        std::lock_guard _(mx);
+        if (!controller || idx < 0 || idx > 3) return 0;
+        return SDL_GameControllerGetAxis(controller, map[idx]);
+    }
 
     bool inited = false;
-    SDL_Joystick *controller = nullptr;
+
+private:
+    std::mutex mx;   // the axes are read from an SDL timer thread
+    SDL_GameController *controller = nullptr;
 };
 
-static SDL_INIT_Context init_context = {};
+// Initialized lazily on first use. SDL_Init must not run from a static
+// constructor: on Android the library is loaded before SDL's JNI glue is
+// ready and before SDL_SetMainReady() is called, so SDL_Init fails there.
+static SDL_INIT_Context &get_init_context() {
+    static SDL_INIT_Context ctx;
+    return ctx;
+}
 
 SDLContext::SDLContext() {
-    if (!init_context.inited) throw std::runtime_error("SDL not inited");
+    if (!get_init_context().inited) throw std::runtime_error("SDL not inited");
 
 }
 void handle_sdl_error(const char *msg) {
@@ -279,6 +355,8 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
     int height = config.window_height;
     aspect_x = config.aspect_x;
     aspect_y = config.aspect_y;
+    _integer_scale = config.integer_scale;
+    _picture_scale = config.picture_scale;
     _crt_filter = config.crt_filter ;
     if (_crt_filter == CrtFilterType::none) {
         _crt_filter = CrtFilterType::autoselect;
@@ -286,9 +364,10 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
     }
 
     _fullscreen_mode = config.fullscreen;
+    _pause_on_focus_loss = config.pause_on_focus_loss;
+    _autosave_on_background = config.autosave_on_background;
     _mouse_size = config.cursor_size;
 
-    std::atomic<bool> done = false;
     std::exception_ptr e;
     std::string_view stage;
     std::string rname;
@@ -305,7 +384,7 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
 
         _window.reset(window);
 
-        auto composer = config.composer;
+        auto composer = config.composer | (config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
 
         stage = "renderer";
 
@@ -313,7 +392,9 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
 
             SDL_Renderer *renderer = SDL_CreateRenderer(_window.get(), -1, composer);
             if (!renderer) {
-                if (config.composer & SDL_RENDERER_SOFTWARE) {
+                // fall back to the software renderer once (checking the current flags,
+                // otherwise a failing software renderer would loop forever)
+                if (composer & SDL_RENDERER_SOFTWARE) {
                     handle_sdl_error("Failed to create composer");
                 } else {
                     composer |= SDL_RENDERER_SOFTWARE;
@@ -340,6 +421,18 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
         SDL_GetRendererInfo(_renderer.get(), &rinfo);
 
         rname = rinfo.name;
+        {
+            int ww = 0, wh = 0, ow = 0, oh = 0;
+            SDL_GetWindowSize(_window.get(), &ww, &wh);
+            SDL_GetRendererOutputSize(_renderer.get(), &ow, &oh);
+            SDL_DisplayMode dm = {};
+            SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(_window.get()), &dm);
+            SDL_Log("Renderer: %s%s%s, texture format %s, window %dx%d, output %dx%d, display %d Hz",
+                    rinfo.name,
+                    (rinfo.flags & SDL_RENDERER_ACCELERATED) ? " (hardware)" : " (software)",
+                    (rinfo.flags & SDL_RENDERER_PRESENTVSYNC) ? " vsync" : "",
+                    SDL_GetPixelFormatName(_texture_render_format), ww, wh, ow, oh, dm.refresh_rate);
+        }
 
         stage = "pixel format";
 
@@ -383,19 +476,25 @@ int SDLContext::init_window(const VideoConfig &config, const char *title, std::f
         _visible_texture = _texture.get();
         _hidden_texture = _texture2.get();
 
-        std::stop_source stop_src;
-
         std::thread main_thrd([&]{
             try {
                 exit_code = game_thread();
             } catch (...) {
                 e = std::current_exception();
             }
-            stop_src.request_stop();
+            // wake up the SDL event loop (portable replacement of std::stop_source)
+            SDL_Event ev = {};
+            ev.type = exit_loop_event_type();
+            SDL_PushEvent(&ev);
         });
         main_thrd.detach();
         SDL_ShowCursor(SDL_DISABLE);
-        event_loop(stop_src.get_token());
+        // app lifecycle events must be seen when they are sent (on mobile the event loop
+        // itself is blocked while the app is in the background), so use an event watch
+        SDL_AddEventWatch(&SDLContext::app_event_watch, this);
+        event_loop();
+        SDL_DelEventWatch(&SDLContext::app_event_watch, this);
+        game_set_inactive(GAME_INACTIVE_BACKGROUND | GAME_INACTIVE_FOCUS, 0);
         SDL_ShowCursor(SDL_ENABLE);
 
     } catch (...) {
@@ -550,8 +649,8 @@ static int axis_dynamic(int c) {
 
 void SDLContext::joystick_handle() {
 
-    int a1 = SDL_JoystickGetAxis(init_context.controller, _jcontrol_map.swap_axis?2:0);
-    int a2 = SDL_JoystickGetAxis(init_context.controller, _jcontrol_map.swap_axis?3:1);
+    int a1 = get_init_context().axis(_jcontrol_map.swap_axis?2:0);
+    int a2 = get_init_context().axis(_jcontrol_map.swap_axis?3:1);
     if (std::abs(a1) - std::abs(a2) > 0x2000) a2 = 0;
     else if (std::abs(a2) - std::abs(a1) >0x2000) a1 = 0;
     else {
@@ -560,8 +659,30 @@ void SDLContext::joystick_handle() {
     }
     int axis1 =  check_axis_dir(axis1_cooldown,adjust_deadzone(a1, _jcontrol_map.walk_deadzone));
     int axis2 =  check_axis_dir(axis2_cooldown,adjust_deadzone(a2, _jcontrol_map.walk_deadzone));
-    int axis3 =  axis_dynamic(adjust_deadzone(SDL_JoystickGetAxis(init_context.controller,_jcontrol_map.swap_axis?0:2), _jcontrol_map.cursor_deadzone));
-    int axis4 =  axis_dynamic(adjust_deadzone(SDL_JoystickGetAxis(init_context.controller,_jcontrol_map.swap_axis?1:3), _jcontrol_map.cursor_deadzone));
+    int raw3 = adjust_deadzone(get_init_context().axis(_jcontrol_map.swap_axis?0:2), _jcontrol_map.cursor_deadzone);
+    int raw4 = adjust_deadzone(get_init_context().axis(_jcontrol_map.swap_axis?1:3), _jcontrol_map.cursor_deadzone);
+    int axis3;
+    int axis4;
+    bool slow = _jcontrol_slow || (_jcontrol_map.slow_cursor_with_mod && _jcontrol_mod_key);
+    if (slow) {
+        // precise mode: about a quarter of the normal speed, sub-pixel steps are accumulated
+        auto speed = [](int c) {
+            double f = std::pow(std::abs(c) * 0.001, 2) * 0.025 * 0.25;
+            return c < 0 ? -f : f;
+        };
+        _cursor_acc_x += speed(raw3);
+        _cursor_acc_y += speed(raw4);
+        axis3 = static_cast<int>(_cursor_acc_x);
+        axis4 = static_cast<int>(_cursor_acc_y);
+        _cursor_acc_x -= axis3;
+        _cursor_acc_y -= axis4;
+        if (raw3 == 0) _cursor_acc_x = 0;
+        if (raw4 == 0) _cursor_acc_y = 0;
+    } else {
+        axis3 = axis_dynamic(raw3);
+        axis4 = axis_dynamic(raw4);
+        _cursor_acc_x = _cursor_acc_y = 0;
+    }
 
     int newx  =  this->ms_event.x + axis3;
     int newy  =  this->ms_event.y + axis4;
@@ -603,6 +724,147 @@ void SDLContext::joystick_handle() {
     }
 }
 
+int SDLCALL SDLContext::app_event_watch(void *ctx, SDL_Event *e) {
+    auto *me = static_cast<SDLContext *>(ctx);
+    switch (e->type) {
+        case SDL_APP_WILLENTERBACKGROUND:
+            me->_in_background = true;
+            if (me->_autosave_on_background) {
+                // let the game handle F5 (its autosave) first, pause shortly after
+                {
+                    std::lock_guard _(me->_mx);
+                    me->_keyboard_queue.push(sdl_keycode_map.get_bios_code(SDL_SCANCODE_F5, false, false));
+                }
+                SDL_Log("App entering background: autosave requested");
+                SDL_AddTimer(800, [](Uint32, void *ctx) -> Uint32 {
+                    auto *self = static_cast<SDLContext *>(ctx);
+                    if (self->_in_background) {
+                        game_set_inactive(GAME_INACTIVE_BACKGROUND, 1);
+                        SDL_Log("Game paused at %u ms", (unsigned)get_game_tick_count());
+                    }
+                    return 0;
+                }, me);
+            } else {
+                game_set_inactive(GAME_INACTIVE_BACKGROUND, 1);
+                SDL_Log("App entering background: game paused at %u ms", (unsigned)get_game_tick_count());
+            }
+            break;
+        case SDL_APP_DIDENTERFOREGROUND:
+            me->_in_background = false;
+            SDL_Log("App in foreground: game resumed at %u ms", (unsigned)get_game_tick_count());
+            game_set_inactive(GAME_INACTIVE_BACKGROUND, 0);
+            break;
+        case SDL_RENDER_DEVICE_RESET:
+            SDL_Log("Warning: render device reset (graphics context lost)");
+            break;
+        case SDL_WINDOWEVENT:
+            if (me->_pause_on_focus_loss) {
+                if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST) game_set_inactive(GAME_INACTIVE_FOCUS, 1);
+                else if (e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED) game_set_inactive(GAME_INACTIVE_FOCUS, 0);
+            }
+            break;
+        default:
+            break;
+    }
+    return 1;
+}
+
+// audio device of the game, for muting from other threads (audio focus)
+static std::atomic<SDL_AudioDeviceID> g_audio_device{0};
+static std::atomic<bool> g_audio_muted{false};
+
+static Uint32 text_input_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
+
+static void (*g_text_input_listener)(int active) = nullptr;
+
+void game_set_text_input_listener(void (*listener)(int active)) {
+    g_text_input_listener = listener;
+}
+
+static Uint32 show_keyboard_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
+
+void game_show_keyboard(void) {
+    SDL_Event ev = {};
+    ev.type = show_keyboard_event_type();
+    SDL_PushEvent(&ev);
+}
+
+void game_text_input(char active) {
+    SDL_Event ev = {};
+    ev.type = text_input_event_type();
+    ev.user.code = active ? 1 : 0;
+    SDL_PushEvent(&ev);
+}
+
+void SDLContext::set_text_input(bool active) {
+    _text_input_active = active;
+    if (g_text_input_listener) g_text_input_listener(active ? 1 : 0);
+#ifdef __ANDROID__
+    // shows / hides the soft keyboard
+    if (active) SDL_StartTextInput(); else SDL_StopTextInput();
+#endif
+}
+
+#ifdef __ANDROID__
+/// UTF-8 text -> characters of the game's font code page (Kamenicky / CP895, Czech letters)
+static std::vector<int> utf8_to_kamenicky(const char *s) {
+    static const std::pair<char32_t, int> cz[] = {
+        {U'á',0xA0},{U'č',0x87},{U'ď',0x83},{U'é',0x82},{U'ě',0x88},{U'í',0xA1},{U'ň',0xA4},{U'ó',0xA2},
+        {U'ř',0xA9},{U'š',0xA8},{U'ť',0x9F},{U'ú',0xA3},{U'ů',0x96},{U'ý',0x98},{U'ž',0x91},
+        {U'Á',0x8F},{U'Č',0x80},{U'Ď',0x85},{U'É',0x90},{U'Ě',0x89},{U'Í',0x8B},{U'Ň',0xA5},{U'Ó',0x95},
+        {U'Ř',0x9E},{U'Š',0x9B},{U'Ť',0x86},{U'Ú',0x97},{U'Ů',0xA6},{U'Ý',0x9D},{U'Ž',0x92},
+    };
+    std::vector<int> out;
+    const unsigned char *p = reinterpret_cast<const unsigned char *>(s);
+    while (*p) {
+        char32_t c;
+        int len;
+        if (*p < 0x80) { c = *p; len = 1; }
+        else if ((*p & 0xE0) == 0xC0) { c = *p & 0x1F; len = 2; }
+        else if ((*p & 0xF0) == 0xE0) { c = *p & 0x0F; len = 3; }
+        else { c = *p & 0x07; len = 4; }
+        for (int i = 1; i < len; ++i) {
+            if ((p[i] & 0xC0) != 0x80) { len = i; c = 0; break; }
+            c = (c << 6) | (p[i] & 0x3F);
+        }
+        p += len;
+        if (c >= 32 && c < 127) { out.push_back(static_cast<int>(c)); continue; }
+        for (const auto &e : cz) if (e.first == c) { out.push_back(e.second); break; }
+    }
+    return out;
+}
+#endif
+
+static Uint32 audio_mute_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
+
+// Called from the Android UI thread. It must not call SDL audio functions there: while the app
+// is paused SDL keeps the audio device locked until the event loop resumes it, and the event
+// loop in turn waits for the UI thread (surface) -> deadlock / ANR. So only remember the state
+// and let the event loop apply it.
+void game_set_audio_muted(char muted) {
+    g_audio_muted = muted != 0;
+    SDL_Event ev = {};
+    ev.type = audio_mute_event_type();
+    SDL_PushEvent(&ev);
+}
+
+void SDLContext::push_virtual_button(int button, bool pressed) {
+    SDL_Event ev = {};
+    ev.type = virtual_button_event_type();
+    ev.user.code = button;
+    ev.user.data1 = reinterpret_cast<void *>(static_cast<intptr_t>(pressed ? 1 : 0));
+    SDL_PushEvent(&ev);
+}
+
 void SDLContext::configure_controller(const JoystickConfig &cfg) {
     _jcontrol_map = cfg;
 }
@@ -611,7 +873,7 @@ bool SDLContext::is_joystick_used() const {
 }
 
  bool SDLContext::is_joystick_enabled() const {
-    return init_context.controller != 0 && _jcontrol_map.enabled;
+    return get_init_context().connected() && _jcontrol_map.enabled;
 }
 
 void SDLContext::generate_j_event(int button, char up) {
@@ -672,7 +934,8 @@ void SDLContext::generate_j_event(int button, char up) {
             case JoystickButton::F11: if (!up) cd = SDL_SCANCODE_F11;break;
             case JoystickButton::F12: if (!up) cd = SDL_SCANCODE_F12;break;
             case JoystickButton::backspace: if (!up) cd = SDL_SCANCODE_BACKSPACE;break;
-            case JoystickButton::mod_key: _jcontrol_mod_key = !up;
+            case JoystickButton::mod_key: _jcontrol_mod_key = !up; break;
+            case JoystickButton::slow_cursor: _jcontrol_slow = !up; break;
         }
         if (cd != SDL_Scancode{}) {
             std::lock_guard _(_mx);
@@ -682,15 +945,7 @@ void SDLContext::generate_j_event(int button, char up) {
 }
 
 
-void SDLContext::event_loop(std::stop_token stp) {
-
-    static Uint32 exit_loop_event = SDL_RegisterEvents(1);
-    std::stop_callback stopcb(stp,[&]{
-        SDL_Event event;
-        event.type = exit_loop_event;
-        SDL_PushEvent(&event);
-    });
-
+void SDLContext::event_loop() {
 
     SDL_Event e;
     while (SDL_WaitEvent(&e)) {
@@ -698,7 +953,7 @@ void SDLContext::event_loop(std::stop_token stp) {
         if (e.type == SDL_QUIT) {
             _quit_requested = true;
             if (_quit_callback) _quit_callback();
-        } else if (e.type == exit_loop_event) {
+        } else if (e.type == exit_loop_event_type()) {
             break;
         } else if (e.type == _update_request_event) {
             update_screen();
@@ -707,7 +962,40 @@ void SDLContext::event_loop(std::stop_token stp) {
         } else if (e.type == SDL_WINDOWEVENT) {
                 if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     _crt_effect.reset();
+                    int ow = 0, oh = 0;
+                    SDL_GetRendererOutputSize(_renderer.get(), &ow, &oh);
+                    SDL_Log("Window size changed: %dx%d (output %dx%d)", e.window.data1, e.window.data2, ow, oh);
                 }
+                // On mobile the surface can appear or change after the game drew its first
+                // screen (e.g. the controller info screen stayed black); present it again.
+                if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || e.window.event == SDL_WINDOWEVENT_EXPOSED
+                        || e.window.event == SDL_WINDOWEVENT_SHOWN || e.window.event == SDL_WINDOWEVENT_RESTORED) {
+                    update_screen(true);
+                    // and once more a moment later: the new surface may not be ready yet
+                    SDL_AddTimer(150, [](Uint32, void *ctx) -> Uint32 {
+                        SDL_Event ev = {};
+                        ev.type = static_cast<SDLContext *>(ctx)->_refresh_request;
+                        SDL_PushEvent(&ev);
+                        return 0;
+                    }, this);
+                }
+        } else if (e.type == SDL_RENDER_TARGETS_RESET || e.type == SDL_RENDER_DEVICE_RESET) {
+            update_screen(true);
+        } else if (e.type == text_input_event_type()) {
+            set_text_input(e.user.code != 0);
+        } else if (e.type == show_keyboard_event_type()) {
+#ifdef __ANDROID__
+            if (_text_input_active) SDL_StartTextInput();   // bring back a keyboard the user closed
+#endif
+#ifdef __ANDROID__
+        } else if (e.type == SDL_TEXTINPUT) {
+            // soft keyboard (and hardware keyboard while a text field is active): characters
+            // arrive as text; convert them to the game's code page (Kamenicky)
+            if (_text_input_active) {
+                std::lock_guard _(_mx);
+                for (int ch : utf8_to_kamenicky(e.text.text)) _keyboard_queue.push(static_cast<uint32_t>(ch));
+            }
+#endif
          } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
             _key_capslock = e.key.keysym.mod & KMOD_CAPS;
             _key_shift =e.key.keysym.mod & KMOD_SHIFT;
@@ -717,7 +1005,17 @@ void SDLContext::event_loop(std::stop_token stp) {
                     _fullscreen_mode = !_fullscreen_mode;
                     SDL_SetWindowFullscreen(_window.get(), _fullscreen_mode ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
                 } else {
-                    auto code =sdl_keycode_map.get_bios_code(e.key.keysym.scancode,
+                    SDL_Scancode sc = e.key.keysym.scancode;
+#ifdef __ANDROID__
+                    // in a text field printable characters come as SDL_TEXTINPUT (see above)
+                    if (_text_input_active && e.key.keysym.sym >= 32 && e.key.keysym.sym < 127
+                            && !(e.key.keysym.mod & KMOD_CTRL)) {
+                        continue;
+                    }
+#endif
+                    // Android Back button / gesture behaves as ESC
+                    if (sc == SDL_SCANCODE_AC_BACK) sc = SDL_SCANCODE_ESCAPE;
+                    auto code =sdl_keycode_map.get_bios_code(sc,
                             e.key.keysym.mod & KMOD_SHIFT, e.key.keysym.mod & KMOD_CTRL);
                     if (code) {
                         std::lock_guard _(_mx);
@@ -731,7 +1029,7 @@ void SDLContext::event_loop(std::stop_token stp) {
                 e= temp;
             }
 
-            SDL_Point mspt(e.motion.x, e.motion.y);
+            SDL_Point mspt = window_to_output(SDL_Point{e.motion.x, e.motion.y});
             SDL_Rect winrc = get_window_aspect_rect();
             SDL_Point srcpt = to_source_point(winrc, mspt);
             ms_event.event = 1;
@@ -739,8 +1037,8 @@ void SDLContext::event_loop(std::stop_token stp) {
             ms_event.x = srcpt.x;
             ms_event.y = srcpt.y;
             if (_mouse) {
-                _mouse_rect.x = e.motion.x;
-                _mouse_rect.y = e.motion.y;
+                _mouse_rect.x = mspt.x;
+                _mouse_rect.y = mspt.y;
                 update_screen(true);
 
             }
@@ -759,10 +1057,33 @@ void SDLContext::event_loop(std::stop_token stp) {
         } else if (e.type == SDL_MOUSEWHEEL) {
             if (e.wheel.y > 0) kbdevent =SDL_SCANCODE_UP;
             else if (e.wheel.y < 0) kbdevent =SDL_SCANCODE_DOWN;
-        } else if (e.type == SDL_JOYBUTTONDOWN) {
-            generate_j_event(e.jbutton.button, 0);
-        } else if (e.type == SDL_JOYBUTTONUP) {
-            generate_j_event(e.jbutton.button, 1);
+        } else if (e.type == SDL_CONTROLLERBUTTONDOWN) {
+            // standard game controller layout (A=0, B=1, X=2, Y=3, Back=4, Guide=5, Start=6,
+            // L3=7, R3=8, L1=9, R1=10, D-pad up/down/left/right=11..14)
+            if (get_init_context().is_ours(e.cbutton.which)) generate_j_event(e.cbutton.button, 0);
+        } else if (e.type == SDL_CONTROLLERBUTTONUP) {
+            if (get_init_context().is_ours(e.cbutton.which)) generate_j_event(e.cbutton.button, 1);
+        } else if (e.type == SDL_CONTROLLERAXISMOTION) {
+            // analog triggers act as buttons 21 / 22 (with hysteresis)
+            if ((e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+                    && get_init_context().is_ours(e.caxis.which)) {
+                int t = e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT ? 0 : 1;
+                bool down = _trigger_down[t] ? e.caxis.value > 8000 : e.caxis.value > 16000;
+                if (down != _trigger_down[t]) {
+                    _trigger_down[t] = down;
+                    generate_j_event(CONTROLLER_BUTTON_LEFT_TRIGGER + t, down ? 0 : 1);
+                }
+            }
+        } else if (e.type == audio_mute_event_type()) {
+            SDL_AudioDeviceID id = g_audio_device.load();
+            if (id) SDL_PauseAudioDevice(id, g_audio_muted.load() ? 1 : 0);
+        } else if (e.type == virtual_button_event_type()) {
+            bool pressed = reinterpret_cast<intptr_t>(e.user.data1) != 0;
+            generate_j_event(e.user.code, pressed ? 0 : 1);
+        } else if (e.type == SDL_CONTROLLERDEVICEADDED) {
+            get_init_context().on_added();
+        } else if (e.type == SDL_CONTROLLERDEVICEREMOVED) {
+            get_init_context().on_removed(e.cdevice.which);
         }
 
         if (kbdevent != SDL_Scancode{}) {
@@ -1091,12 +1412,32 @@ void SDLContext::show_blend_transition(const SDL_Rect &wrkarea, const SDL_Rect &
     push_item(BlendTransitionReq{wrkarea, prev, next, phase});
 }
 
+SDL_Point SDLContext::window_to_output(const SDL_Point &pt) const {
+    // mouse / touch coordinates are in window units, rendering is in output pixels;
+    // they differ e.g. with display scaling on some phones or high-DPI desktops
+    int ww = 0, wh = 0, ow = 0, oh = 0;
+    SDL_GetWindowSize(_window.get(), &ww, &wh);
+    SDL_GetRendererOutputSize(_renderer.get(), &ow, &oh);
+    if (ww <= 0 || wh <= 0 || (ww == ow && wh == oh)) return pt;
+    return {pt.x * ow / ww, pt.y * oh / wh};
+}
+
 SDL_Rect SDLContext::get_window_aspect_rect() const {
     SDL_Rect w;
     int ww;
     int wh;
-    SDL_GetWindowSize(_window.get(), &ww, &wh);
-    if (aspect_x && aspect_y) {
+    // the picture is placed in renderer output pixels (not window units)
+    if (SDL_GetRendererOutputSize(_renderer.get(), &ww, &wh) != 0 || ww <= 0 || wh <= 0) {
+        SDL_GetWindowSize(_window.get(), &ww, &wh);
+    }
+    if (_integer_scale && ww >= 640 && wh >= 480) {
+        // largest whole multiple of the 640x480 game screen that fits, centered
+        int k = std::min(ww / 640, wh / 480);
+        w.w = 640 * k;
+        w.h = 480 * k;
+        w.x = (ww - w.w) / 2;
+        w.y = (wh - w.h) / 2;
+    } else if (aspect_x && aspect_y) {
         int apw  = wh * aspect_x / aspect_y;
         int aph =  ww * aspect_y / aspect_x;
         int fw;
@@ -1117,6 +1458,15 @@ SDL_Rect SDLContext::get_window_aspect_rect() const {
         w.y = 0;
         w.w = ww;
         w.h = wh;
+    }
+    if (!_integer_scale && _picture_scale > 0 && _picture_scale < 100) {
+        // user picture size (e.g. to keep the picture away from curved display edges)
+        int nw = w.w * _picture_scale / 100;
+        int nh = w.h * _picture_scale / 100;
+        w.x += (w.w - nw) / 2;
+        w.y += (w.h - nh) / 2;
+        w.w = nw;
+        w.h = nh;
     }
     return w;
 }
@@ -1188,15 +1538,18 @@ SDLContext::AudioInfo SDLContext::init_audio(const AudioConfig &config, SDL_Audi
         throw std::runtime_error(err.str());
     }
     _audio.reset(id);
+    g_audio_device = id;
 
     return {obtaied.freq};
 }
 void SDLContext::pause_audio(bool pause) {
     SDL_AudioDeviceID id = _audio.get();
-    SDL_PauseAudioDevice(id, pause?1:0);
+    // stay paused while muted by the platform (audio focus lost)
+    SDL_PauseAudioDevice(id, (pause || g_audio_muted.load()) ? 1 : 0);
 }
 
 void SDLContext::close_audio() {
+    g_audio_device = 0;
     _audio.reset();
 }
 
@@ -1330,6 +1683,7 @@ SDLContext::JoystickButton SDLContext::button_from_string(std::string_view s) {
     if (s=="F12") return JoystickButton::F12;
     if (s=="backspace") return JoystickButton::backspace;
     if (s=="mod_key") return JoystickButton::mod_key;
+    if (s=="slow_cursor") return JoystickButton::slow_cursor;
     return JoystickButton::disabled;
 
 }

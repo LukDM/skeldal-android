@@ -24,6 +24,18 @@ int game_display_init(const INI_CONFIG_SECTION *display_section,
     if (sscanf(aspect_str, "%d:%d",&cfg.aspect_x, &cfg.aspect_y) != 2) {
         cfg.aspect_x = cfg.aspect_y = 0;
     }
+    // scaling = aspect (default, keep aspect ratio) | stretch (fill the screen) | integer (whole multiples)
+    const char *scaling = ini_get_string(display_section, "scaling", "aspect");
+    if (istrcmp(scaling, "stretch") == 0) {
+        cfg.aspect_x = cfg.aspect_y = 0;
+    } else if (istrcmp(scaling, "integer") == 0) {
+        cfg.integer_scale = true;
+    }
+    cfg.vsync = ini_get_boolean(display_section, "vsync", 0) == 1;
+    cfg.pause_on_focus_loss = ini_get_boolean(display_section, "pause_on_focus_loss", 0) == 1;
+    cfg.autosave_on_background = ini_get_boolean(display_section, "autosave_on_background", 0) == 1;
+    cfg.picture_scale = ini_get_int(display_section, "picture_scale", 100);
+    if (cfg.picture_scale < 50 || cfg.picture_scale > 100) cfg.picture_scale = 100;
     cfg.fullscreen = ini_get_boolean(display_section, "fullscreen", 1) == 1;
     const char *comp = ini_get_string(display_section, "composer", "auto");
     if (istrcmp(comp, "hardware") == 0 || istrcmp(comp, "hw") == 0) {

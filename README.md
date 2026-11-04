@@ -25,6 +25,16 @@ make all
 
 
 
+## Android
+
+An Android port (launcher with game data import, touch controls, gamepad support) lives in
+`android/` and `platform/android/`. See [ANDROID.md](ANDROID.md) for build and usage.
+
+```
+cd android
+./gradlew assembleDebug
+```
+
 ## Achievements backend (Steam / GOG Galaxy)
 
 Achievements are provided through one of three interchangeable backends, selected at configure time:

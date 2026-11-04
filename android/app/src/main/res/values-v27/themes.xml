@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Skeldal" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF1B1410</item>
+        <item name="android:statusBarColor">#FF1B1410</item>
+        <item name="android:navigationBarColor">#FF1B1410</item>
+    </style>
+
+    <!-- Draw under the display cutout so the 4:3 image is centered on the physical screen
+         (the cutout falls into the black side bars). -->
+    <style name="Theme.Skeldal.Game" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">#FF000000</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

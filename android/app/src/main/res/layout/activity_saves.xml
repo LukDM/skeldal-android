@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF1B1410"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            style="@style/SettingsHeader"
+            android:text="@string/saves_title" />
+
+        <TextView
+            android:id="@+id/saves_info"
+            style="@style/SettingsLabel" />
+
+        <ProgressBar
+            android:id="@+id/saves_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_saves_export"
+            style="@style/LauncherButton"
+            android:layout_marginTop="16dp"
+            android:text="@string/saves_export" />
+
+        <Button
+            android:id="@+id/btn_saves_import"
+            style="@style/LauncherButton"
+            android:text="@string/saves_import" />
+
+        <Button
+            android:id="@+id/btn_saves_restore"
+            style="@style/LauncherButton"
+            android:text="@string/saves_restore" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:layout_marginTop="16dp"
+            android:text="@string/saves_hint" />
+
+        <Button
+            android:id="@+id/btn_saves_close"
+            style="@style/LauncherButton"
+            android:layout_marginTop="16dp"
+            android:text="@string/btn_close" />
+    </LinearLayout>
+</ScrollView>

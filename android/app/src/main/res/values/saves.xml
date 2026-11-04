@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn_saves">Uložené pozice</string>
+    <string name="saves_title">Uložené pozice</string>
+    <string name="saves_none">Zatím nemáte žádné uložené pozice.</string>
+    <string name="saves_summary">Uložených pozic: %1$d\nNejnovější: %2$s\nVelikost: %3$d kB</string>
+    <string name="saves_export">Exportovat do souboru (ZIP)</string>
+    <string name="saves_import">Importovat ze souboru (ZIP)</string>
+    <string name="saves_restore">Obnovit ze zálohy</string>
+    <string name="saves_hint">Export i import používá systémový výběr souborů, takže můžete zvolit i Google Disk, pokud ho máte v telefonu.\n\nImport pozice přidá: stávající zůstanou, stejné pozice se přepíšou. Před každým importem se stávající pozice automaticky zazálohují (posledních 5 záloh), takže se k nim lze vrátit přes „Obnovit ze zálohy“.\n\nPozice jsou svázané s kampaní, ne se zařízením, takže je lze přenášet mezi telefony a tablety.</string>
+    <string name="saves_exported">Exportováno pozic: %1$d.</string>
+    <string name="saves_imported">Importováno pozic: %1$d.</string>
+    <string name="saves_backup_made">Předchozí pozice byly zazálohovány.</string>
+    <string name="saves_restore_title">Obnovit ze zálohy</string>
+    <string name="saves_restore_confirm">Nahradit všechny současné pozice zálohou z %1$s? (Současný stav se nejdřív také zazálohuje.)</string>
+    <string name="saves_restore_do">Obnovit</string>
+    <string name="saves_restored">Obnoveno pozic: %1$d.</string>
+    <string name="saves_failed">Operace se nezdařila.</string>
+</resources>

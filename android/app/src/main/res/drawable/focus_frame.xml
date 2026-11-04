@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Drawn on top of settings rows so the item selected with a gamepad / D-pad is clearly visible. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="6dp" />
+            <solid android:color="#33FFD37A" />
+            <stroke android:width="3dp" android:color="#FFFFD37A" />
+        </shape>
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>

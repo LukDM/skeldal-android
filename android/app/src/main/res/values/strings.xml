@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Brány Skeldalu</string>
+    <string name="btn_start_game">Spustit hru</string>
+    <string name="btn_import_game">Importovat hru ze složky</string>
+    <string name="btn_import_zip">Importovat hru ze ZIP</string>
+    <string name="btn_manage_files">Správa herních souborů</string>
+    <string name="btn_settings">Nastavení</string>
+    <string name="btn_info">Informace</string>
+    <string name="btn_exit">Ukončit</string>
+    <string name="btn_verify">Zkontrolovat soubory</string>
+    <string name="btn_delete_data">Odstranit herní data</string>
+    <string name="btn_close">Zavřít</string>
+    <string name="btn_start_anyway">Přesto spustit</string>
+
+    <string name="state_no_installation">Vítejte! Pro hraní importujte originální herní soubory z PC verze (složku nebo ZIP).</string>
+    <string name="state_importing">Importuji herní data…</string>
+    <string name="state_importing_percent">Importuji herní data… %1$d %%</string>
+    <string name="state_validating">Kontroluji herní soubory…</string>
+    <string name="state_ready">✓ Hra je připravena\n%1$s</string>
+    <string name="state_incomplete">Instalace je neúplná, některé soubory chybí.\n%1$s</string>
+    <string name="state_invalid">Importovaná data nejsou platná (chybí SKELDAL.DDL). Importujte hru znovu.</string>
+
+    <string name="error_config">Nepodařilo se uložit konfiguraci hry. Zkontrolujte volné místo v telefonu.</string>
+    <string name="import_done">Import dokončen.</string>
+    <string name="incomplete_start_warning">Chybí tyto soubory:\n%1$s\n\nHra nemusí fungovat správně.</string>
+    <string name="error_access_denied">Aplikace nemá přístup k vybraným souborům. Vyberte je prosím znovu.</string>
+    <string name="error_import_generic">Import se nezdařil kvůli neočekávané chybě (%1$s).</string>
+
+    <string name="manage_no_metadata">Herní data byla importována starší verzí aplikace. Použijte „Zkontrolovat soubory“.</string>
+    <string name="manage_type">Verze: %1$s</string>
+    <string name="manage_source">Zdroj: %1$s</string>
+    <string name="manage_date">Importováno: %1$s</string>
+    <string name="manage_files">Soubory: %1$d (%2$d MB)</string>
+    <string name="manage_music">Hudební stopy: %1$d</string>
+    <string name="manage_video_yes">Úvodní video: ano</string>
+    <string name="manage_video_no">Úvodní video: ne</string>
+    <string name="manage_languages">Jazyky: %1$s</string>
+    <string name="manage_missing">Chybějící soubory:\n%1$s</string>
+    <string name="verify_ok">Soubory jsou v pořádku (%1$d souborů).</string>
+    <string name="verify_no_data">Nejsou importována žádná herní data.</string>
+    <string name="delete_confirm">Odstranit importovaná herní data? Uložené pozice zůstanou zachovány.</string>
+    <string name="delete_done">Herní data odstraněna.</string>
+
+    <string name="status_no_data">Herní data nejsou importována.</string>
+    <string name="status_data_ready">Herní data nalezena.</string>
+    <string name="info_engine">Engine: %1$s · SDL %2$s</string>
+    <string name="info_sdl">SDL %1$s</string>
+    <string name="info_text_full">Brány Skeldalu – Android port\nVerze aplikace: %1$s%2$s\n\nZdrojový kód hry: github.com/ondra-novak/gates_of_skeldal (MIT).\nAplikace neobsahuje žádná herní data. Je určena pouze pro uživatele, kteří vlastní originální hru.</string>
+    <string name="btn_licenses">Licence</string>
+    <string name="crash_message">Hra byla při posledním spuštění neočekávaně ukončena.\n\nImportovaná data zůstala zachována.</string>
+    <string name="crash_restart">Spustit znovu</string>
+    <string name="crash_open_log">Otevřít log</string>
+    <string name="error_with_details">%1$s\n\nPodrobnosti: %2$s</string>
+    <string name="log_title">Log posledního spuštění</string>
+    <string name="log_empty">Log je prázdný.</string>
+    <string name="info_text">Brány Skeldalu – Android port.\nVerze %1$s\nUrčeno pouze pro uživatele, kteří vlastní originální hru. Aplikace neobsahuje žádná herní data.</string>
+    <string name="touch_keyboard">⌨ Klávesnice</string>
+</resources>

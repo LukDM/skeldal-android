@@ -439,6 +439,7 @@ void type_text_v2(va_list args)
   pos=strlen(text);
   len=pos;
   tw=text_width(text);
+  game_text_input(1);   /* platform: soft keyboard on mobile */
   do
      {
      char sz[2]=" ";
@@ -521,6 +522,7 @@ void type_text_v2(va_list args)
      edit=1;
      }
   while (wait_loop);
+  game_text_input(0);
   put_picture(x,y,back_pic);
   position(x,y);
   set_font(font,color);
