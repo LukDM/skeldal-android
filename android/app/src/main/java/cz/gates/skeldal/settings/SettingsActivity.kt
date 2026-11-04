@@ -26,6 +26,7 @@ class SettingsActivity : Activity() {
     private lateinit var fullscreen: Switch
     private lateinit var smooth: Switch
     private lateinit var vsync: Switch
+    private lateinit var videoLines: Switch
     private lateinit var size: SeekBar
     private lateinit var picture: SeekBar
     private lateinit var pictureLabel: TextView
@@ -65,6 +66,7 @@ class SettingsActivity : Activity() {
         fullscreen = findViewById(R.id.switch_fullscreen)
         smooth = findViewById(R.id.switch_smooth)
         vsync = findViewById(R.id.switch_vsync)
+        videoLines = findViewById(R.id.switch_video_scanlines)
         size = findViewById(R.id.seek_touch_size)
         picture = findViewById(R.id.seek_picture_scale)
         pictureLabel = findViewById(R.id.label_picture_scale)
@@ -129,7 +131,7 @@ class SettingsActivity : Activity() {
 
         val select = SimpleSelect { save() }
         for (sp in listOf(scaling, crt, touchMode, language)) sp.onItemSelectedListener = select
-        for (sw in listOf(fullscreen, smooth, vsync, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
+        for (sw in listOf(fullscreen, smooth, vsync, videoLines, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
                           ctrlEnabled, swapSticks, autosaveBg) + optionalSwitches.values) {
             sw.setOnCheckedChangeListener { _, _ -> save() }
         }
@@ -183,6 +185,7 @@ class SettingsActivity : Activity() {
         fullscreen.isChecked = s.fullscreen
         smooth.isChecked = s.smoothScaling
         vsync.isChecked = s.vsync
+        videoLines.isChecked = s.videoScanlines
         size.progress = s.touchSize - 50
         picture.progress = s.pictureScale - 50
         opacity.progress = s.touchOpacity - 10
@@ -209,6 +212,7 @@ class SettingsActivity : Activity() {
                 smoothScaling = smooth.isChecked,
                 crtFilter = crtValues[crt.selectedItemPosition.coerceIn(crtValues.indices)],
                 vsync = vsync.isChecked,
+                videoScanlines = videoLines.isChecked,
                 pictureScale = pictureValue(),
                 touchMode = touchModeValues[touchMode.selectedItemPosition.coerceIn(touchModeValues.indices)],
                 touchSize = sizeValue(),

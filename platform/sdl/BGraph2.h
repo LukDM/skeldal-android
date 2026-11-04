@@ -43,6 +43,8 @@ void game_display_hide_sprite(int sprite_id);
 ///unload sprite and free index
 void game_display_unload_sprite(int sprite);
 void game_display_disable_crt_effect_temporary(char disable);
+///1 = videos are shown with darker every second line ([video] video_scanlines, default on)
+char game_display_video_scanlines(void);
 
 void *DxPrepareWalk(int ypos);
 void DxZoomWalk(void *handle, int ypos, int *points,float phase, void *lodka);

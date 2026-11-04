@@ -76,6 +76,7 @@ static void StretchImageHQ(word *src, word *trg, int32_t linelen, char full)
   }
 
   trg_row = trg;
+  const char scanlines = game_display_video_scanlines();
 
   for (int y = 0; y < ys-1; ++y) {
       for (int x = 0; x < 2*xs; ++x) {
@@ -86,7 +87,7 @@ static void StretchImageHQ(word *src, word *trg, int32_t linelen, char full)
           word n5 = avg_pixels(n1, n2);
           word n6 = avg_pixels(n3, n4);
           word n7 = avg_pixels(n5, n6);
-          trg_row[x+linelen] = avg_pixels(n7,0);
+          trg_row[x+linelen] = scanlines ? avg_pixels(n7,0) : n7;
       }
       trg_row += 2*linelen;
   }

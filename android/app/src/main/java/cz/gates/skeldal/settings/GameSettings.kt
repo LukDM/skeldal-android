@@ -10,6 +10,8 @@ data class GameSettings(
     val smoothScaling: Boolean = false,
     val crtFilter: CrtFilter = CrtFilter.OFF,
     val vsync: Boolean = false,
+    /** Videos with darker every second line like the original game. */
+    val videoScanlines: Boolean = false,
     /** Size of the game picture in % of the largest size that fits (50..100). */
     val pictureScale: Int = 100,
     // touch controls (Milestone 4)
@@ -85,6 +87,7 @@ data class GameSettings(
         "smoothScaling" to smoothScaling,
         "crtFilter" to crtFilter.name,
         "vsync" to vsync,
+        "videoScanlines" to videoScanlines,
         "pictureScale" to pictureScale,
         "touchMode" to touchMode.name,
         "touchSize" to touchSize,
@@ -129,6 +132,7 @@ data class GameSettings(
                 smoothScaling = (m["smoothScaling"] as? Boolean) ?: d.smoothScaling,
                 crtFilter = enumOr(m["crtFilter"], d.crtFilter),
                 vsync = (m["vsync"] as? Boolean) ?: d.vsync,
+                videoScanlines = (m["videoScanlines"] as? Boolean) ?: d.videoScanlines,
                 pictureScale = ((m["pictureScale"] as? Int) ?: d.pictureScale).coerceIn(50, 100),
                 touchMode = enumOr(m["touchMode"], d.touchMode),
                 touchSize = ((m["touchSize"] as? Int) ?: d.touchSize).coerceIn(50, 200),

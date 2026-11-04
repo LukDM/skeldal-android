@@ -65,6 +65,11 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_vsync" />
 
+        <Switch
+            android:id="@+id/switch_video_scanlines"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_video_scanlines" />
+
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_crt" />

@@ -8,6 +8,7 @@
     <string name="settings_smooth">Vyhlazování obrazu (místo ostrých pixelů)</string>
     <string name="settings_picture_scale">Velikost obrazu: %1$d %%</string>
     <string name="settings_picture_scale_hint">Zmenší obraz hry, pokud okraje displeje (zaoblené rohy, výřez) zakrývají jeho část. Nepoužije se u celočíselného škálování.</string>
+    <string name="settings_video_scanlines">Pruhy ve videích (jako originál)</string>
     <string name="settings_vsync">Vertikální synchronizace (VSync)</string>
     <string name="settings_crt">Filtr CRT monitoru</string>
     <string name="settings_crt_hint">Napodobuje starý monitor. Projeví se jen při výšce obrazu alespoň 720 pixelů.</string>

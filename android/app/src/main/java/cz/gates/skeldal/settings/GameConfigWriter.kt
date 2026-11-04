@@ -23,6 +23,7 @@ object GameConfigWriter {
         append("scale_quality=").append(if (settings.smoothScaling) "linear" else "nearest").append('\n')
         append("crt_filter=").append(settings.crtFilter.ini).append('\n')
         append("vsync=").append(onOff(settings.vsync)).append('\n')
+        append("video_scanlines=").append(onOff(settings.videoScanlines)).append('\n')
         append("composer=auto\n")
         // pause also when e.g. the notification shade covers the game (background pause is always on)
         append("pause_on_focus_loss=on\n")
