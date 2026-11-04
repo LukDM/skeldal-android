@@ -1,10 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- App icon foreground: crossed swords behind a shield (original artwork made for this port). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFE8D9A8"
-        android:pathData="M54,22 L78,54 L54,86 L30,54 Z" />
+  <group android:scaleX="0.84" android:scaleY="0.84" android:pivotX="54" android:pivotY="54">
+    <group android:rotation="-38" android:pivotX="54" android:pivotY="54">
+      <path android:pathData="M54,16 L57.5,22 L57.5,66 L50.5,66 L50.5,22 Z">
+        <aapt:attr name="android:fillColor">
+          <gradient android:type="linear" android:startX="50" android:startY="0" android:endX="58" android:endY="0">
+            <item android:offset="0" android:color="#FFF4F7FA"/>
+            <item android:offset="0.5" android:color="#FFC9D2DC"/>
+            <item android:offset="1" android:color="#FF8E9AA8"/>
+          </gradient>
+        </aapt:attr>
+      </path>
+      <path android:pathData="M54,19 L54,65" android:strokeColor="#FF7E8896" android:strokeWidth="0.8"/>
+      <path android:pathData="M45,66 H63 A2,2 0 0 1 63,70 H45 A2,2 0 0 1 45,66 Z" android:fillColor="#FFE8C870"/>
+      <path android:pathData="M52,70 H56 V81 H52 Z" android:fillColor="#FF5A3A22"/>
+      <path android:pathData="M51,83.5 A3,3 0 1 0 57,83.5 A3,3 0 1 0 51,83.5 Z" android:fillColor="#FFE8C870"/>
+    </group>
+    <group android:rotation="38" android:pivotX="54" android:pivotY="54">
+      <path android:pathData="M54,16 L57.5,22 L57.5,66 L50.5,66 L50.5,22 Z">
+        <aapt:attr name="android:fillColor">
+          <gradient android:type="linear" android:startX="50" android:startY="0" android:endX="58" android:endY="0">
+            <item android:offset="0" android:color="#FFF4F7FA"/>
+            <item android:offset="0.5" android:color="#FFC9D2DC"/>
+            <item android:offset="1" android:color="#FF8E9AA8"/>
+          </gradient>
+        </aapt:attr>
+      </path>
+      <path android:pathData="M54,19 L54,65" android:strokeColor="#FF7E8896" android:strokeWidth="0.8"/>
+      <path android:pathData="M45,66 H63 A2,2 0 0 1 63,70 H45 A2,2 0 0 1 45,66 Z" android:fillColor="#FFE8C870"/>
+      <path android:pathData="M52,70 H56 V81 H52 Z" android:fillColor="#FF5A3A22"/>
+      <path android:pathData="M51,83.5 A3,3 0 1 0 57,83.5 A3,3 0 1 0 51,83.5 Z" android:fillColor="#FFE8C870"/>
+    </group>
+    <path android:pathData="M37,37 H71 V55 Q71,73 54,83 Q37,73 37,55 Z"
+        android:strokeColor="#FFE8C870" android:strokeWidth="3" android:strokeLineJoin="round">
+      <aapt:attr name="android:fillColor">
+        <gradient android:type="linear" android:startX="0" android:startY="34" android:endX="0" android:endY="86">
+          <item android:offset="0" android:color="#FF8A2A22"/>
+          <item android:offset="1" android:color="#FF4E140F"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path android:pathData="M54,45 L56.5,56 L54,70 L51.5,56 Z M44,56 L54,53.5 L64,56 L54,58.5 Z" android:fillColor="#FFE8C870"/>
+  </group>
 </vector>
