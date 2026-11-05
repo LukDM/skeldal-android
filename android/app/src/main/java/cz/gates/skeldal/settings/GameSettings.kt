@@ -14,6 +14,8 @@ data class GameSettings(
     val videoScanlines: Boolean = false,
     /** Allow portrait (picture at the top, controls below); otherwise landscape only. */
     val allowPortrait: Boolean = true,
+    /** Small map in the corner also outside of battle (engine extra EX_ALWAYS_MINIMAP). */
+    val alwaysMinimap: Boolean = false,
     /** Size of the game picture in % of the largest size that fits (50..100). */
     val pictureScale: Int = 100,
     // touch controls (Milestone 4)
@@ -91,6 +93,7 @@ data class GameSettings(
         "vsync" to vsync,
         "videoScanlines" to videoScanlines,
         "allowPortrait" to allowPortrait,
+        "alwaysMinimap" to alwaysMinimap,
         "pictureScale" to pictureScale,
         "touchMode" to touchMode.name,
         "touchSize" to touchSize,
@@ -137,6 +140,7 @@ data class GameSettings(
                 vsync = (m["vsync"] as? Boolean) ?: d.vsync,
                 videoScanlines = (m["videoScanlines"] as? Boolean) ?: d.videoScanlines,
                 allowPortrait = (m["allowPortrait"] as? Boolean) ?: d.allowPortrait,
+                alwaysMinimap = (m["alwaysMinimap"] as? Boolean) ?: d.alwaysMinimap,
                 pictureScale = ((m["pictureScale"] as? Int) ?: d.pictureScale).coerceIn(50, 100),
                 touchMode = enumOr(m["touchMode"], d.touchMode),
                 touchSize = ((m["touchSize"] as? Int) ?: d.touchSize).coerceIn(50, 200),

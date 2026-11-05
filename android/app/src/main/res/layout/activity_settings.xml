@@ -75,6 +75,11 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_allow_portrait" />
 
+        <Switch
+            android:id="@+id/switch_always_minimap"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_always_minimap" />
+
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_crt" />
