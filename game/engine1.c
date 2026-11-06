@@ -1297,20 +1297,38 @@ void draw_enemy(DRW_ENEMY *drw)
         }
     }
     if ((cfg_show_lives & 2) && drw->show_cfg_lives) {
-        // health bar above the enemy: green -> yellow -> red
+        // pixel-art health bar above the enemy: dark frame, 10 segments with a light top
+        // and a dark bottom row; green -> yellow -> red
+        enum { SEGS = 10, SEG_W = 3, SEG_H = 3 };
+        int bw = SEGS * (SEG_W + 1) - 1 + 4;        // segments + gaps + frame and padding
+        int bh = SEG_H + 4;
         int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6 - ((show_lives || (cfg_show_lives & 1)) ? 14 : 0);
-        int bw = 40, bh = 5;
         int bx = lx - bw / 2;
-        if (bx > 0 && bx + bw < 639 && ly - bh > SCREEN_OFFLINE && drw->maxnum > 0) {
+        int top = ly - bh;
+        if (bx > 0 && bx + bw < 639 && top > SCREEN_OFFLINE && drw->maxnum > 0) {
             int lives = drw->num < 0 ? 0 : (drw->num > drw->maxnum ? drw->maxnum : drw->num);
-            int fill = (bw - 2) * lives / drw->maxnum;
+            int filled = lives > 0 ? (SEGS * lives + drw->maxnum - 1) / drw->maxnum : 0;
             int pct = 100 * lives / drw->maxnum;
+            word hi, mid, lo;
+            if (pct > 60) { hi = RGB555(14, 28, 9); mid = RGB555(6, 21, 4); lo = RGB555(2, 12, 2); }
+            else if (pct > 30) { hi = RGB555(31, 28, 12); mid = RGB555(25, 20, 3); lo = RGB555(15, 11, 1); }
+            else { hi = RGB555(31, 12, 8); mid = RGB555(23, 4, 3); lo = RGB555(12, 1, 1); }
             RedirectScreenBufferSecond();
-            curcolor = RGB555(2, 2, 2);
-            bar32(bx, ly - bh, bx + bw - 1, ly - 1);
-            if (fill > 0) {
-                curcolor = pct > 60 ? RGB555(6, 26, 6) : (pct > 30 ? RGB555(29, 25, 4) : RGB555(28, 5, 4));
-                bar32(bx + 1, ly - bh + 1, bx + fill, ly - 2);
+            curcolor = RGB555(2, 1, 1);                       // frame
+            bar32(bx, top, bx + bw - 1, ly - 1);
+            curcolor = RGB555(7, 5, 3);                       // empty background
+            bar32(bx + 1, top + 1, bx + bw - 2, ly - 2);
+            for (int k = 0; k < SEGS; k++) {
+                int sx = bx + 2 + k * (SEG_W + 1);
+                int sy = top + 2;
+                if (k < filled) {
+                    curcolor = hi;  bar32(sx, sy, sx + SEG_W - 1, sy);
+                    curcolor = mid; bar32(sx, sy + 1, sx + SEG_W - 1, sy + SEG_H - 2);
+                    curcolor = lo;  bar32(sx, sy + SEG_H - 1, sx + SEG_W - 1, sy + SEG_H - 1);
+                } else {
+                    curcolor = RGB555(4, 3, 2);               // empty segment
+                    bar32(sx, sy, sx + SEG_W - 1, sy + SEG_H - 1);
+                }
             }
             RestoreScreen();
         }
