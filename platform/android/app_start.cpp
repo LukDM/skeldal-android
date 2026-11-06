@@ -224,6 +224,12 @@ Java_cz_gates_skeldal_NativeBridge_nativeShowKeyboard(JNIEnv *, jclass) {
     game_show_keyboard();
 }
 
+/// Optional "keyboard" touch button: keyboard on / off anywhere in the game.
+extern "C" JNIEXPORT void JNICALL
+Java_cz_gates_skeldal_NativeBridge_nativeToggleKeyboard(JNIEnv *, jclass) {
+    game_toggle_keyboard();
+}
+
 /// Extra gamepad button (outside the standard layout, e.g. M1/M2) pressed or released.
 /// index 0..8 maps to controller buttons 23..31 of the [controller] section.
 extern "C" JNIEXPORT void JNICALL

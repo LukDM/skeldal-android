@@ -1295,7 +1295,26 @@ void draw_enemy(DRW_ENEMY *drw)
                     last_scale, y + 1, (clipr << 16) + clipl);
         }
     }
-    if (show_lives || cfg_show_lives) {
+    if (cfg_show_lives & 2) {
+        // health bar above the enemy: green -> yellow -> red
+        int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6 - ((show_lives || (cfg_show_lives & 1)) ? 14 : 0);
+        int bw = 40, bh = 5;
+        int bx = lx - bw / 2;
+        if (bx > 0 && bx + bw < 639 && ly - bh > SCREEN_OFFLINE && drw->maxnum > 0) {
+            int lives = drw->num < 0 ? 0 : (drw->num > drw->maxnum ? drw->maxnum : drw->num);
+            int fill = (bw - 2) * lives / drw->maxnum;
+            int pct = 100 * lives / drw->maxnum;
+            RedirectScreenBufferSecond();
+            curcolor = RGB555(2, 2, 2);
+            bar32(bx, ly - bh, bx + bw - 1, ly - 1);
+            if (fill > 0) {
+                curcolor = pct > 60 ? RGB555(6, 26, 6) : (pct > 30 ? RGB555(29, 25, 4) : RGB555(28, 5, 4));
+                bar32(bx + 1, ly - bh + 1, bx + fill, ly - 2);
+            }
+            RestoreScreen();
+        }
+    }
+    if (show_lives || (cfg_show_lives & 1)) {
         char s[25];
 
         int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6;

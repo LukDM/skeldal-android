@@ -770,6 +770,69 @@ static char mob_not_invis(int sector)
   return 1;
   }
 
+/// transparent map over the 3D view (toggled by the O key), see draw_game_minimaps()
+char overlay_map_enabled = 0;
+/// darken the 3D view under the overlay map ([game] overlay_map_dim)
+char overlay_map_dim = 1;
+
+/// Map drawn over the whole 3D view without a background ("Diablo style"): the explored part of
+/// the level around the party, rotated so that forward is up, the party in the center.
+void draw_overlay_map(void)
+  {
+  const int cx = 320 - 4, cy = 197 - 4;      // top-left corner of the party's square
+  const int rx = 39, ry = 22;                // visible squares around the party (640x360 view)
+  int layer=map_coord[viewsector].layer;
+  int xr=map_coord[viewsector].x;
+  int yr=map_coord[viewsector].y;
+  int i,j,k,xc=0,yc=0,x,y;
+
+  if (overlay_map_dim) trans_bar(0,17,640,360,0);
+  for(j=0;j<2;j++)
+     for(i=1;i<mapsize;i++)
+        if (map_coord[i].flags & 1 && map_coord[i].layer==layer)
+           {
+           switch (viewdir & 3)
+              {
+              case 0:xc=map_coord[i].x-xr;yc=map_coord[i].y-yr;break;
+              case 1:yc=-map_coord[i].x+xr;xc=map_coord[i].y-yr;break;
+              case 2:xc=-map_coord[i].x+xr;yc=-map_coord[i].y+yr;break;
+              case 3:yc=map_coord[i].x-xr;xc=-map_coord[i].y+yr;break;
+              }
+           if (xc<-rx || xc>rx || yc<-ry || yc>ry) continue;
+           x=xc*8+cx;y=yc*8+cy;
+           if (y<17 || y+8>=377 || x<0 || x+8>=640) continue;
+           draw_amap_sector(x,y,i,j,viewdir &3,MEDIUM_MAP_LINE1,MEDIUM_MAP_LINE2);
+           if (!j) continue;
+           if (mob_map[i] && mob_not_invis(i))
+              {
+              position(x+1,y+1);set_font(H_FSYMB,AUTOMAP_MOB);
+              outtext("N");
+              }
+           if (map_coord[i].flags & MC_PLAYER)
+              {
+              int u=-1,z=-1;
+              for(k=0;k<POCET_POSTAV;k++)
+                 if (postavy[k].sektor==i) {
+                    if (postavy[k].groupnum==cur_group) z=k;else u=k;
+                 }
+              if (z!=-1) u=z;
+              if (u!=-1)
+                 {
+                 set_font(H_FSYMB,postavy[u].groupnum==cur_group && !battle?RGB888(255,255,255):barvy_skupin[postavy[u].groupnum]);
+                 position(x+1,y+1);
+                 outtext("M");
+                 }
+              }
+           }
+  }
+
+/// minimap / overlay map over the 3D view, whichever is enabled
+void draw_game_minimaps(void)
+  {
+  if (overlay_map_enabled) draw_overlay_map();
+  else if (battle || (game_extras & EX_ALWAYS_MINIMAP)) draw_medium_map();
+  }
+
 void draw_medium_map(void)
   {
   int xr, yr;

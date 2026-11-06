@@ -1690,7 +1690,7 @@ void step_zoom(char smer)
      bott_draw(0);
      other_draw();
     if (!nopass) shift_zoom(smer);
-    if (battle || (game_extras & EX_ALWAYS_MINIMAP)) draw_medium_map();
+    draw_game_minimaps();
     sort_groups();
     bott_draw(0);
     other_draw();
@@ -1745,8 +1745,7 @@ void turn_zoom(int smer) {
         turn_right();
     }
     chod_s_postavama(0);
-    if (battle || (game_extras & EX_ALWAYS_MINIMAP))
-        draw_medium_map();
+    draw_game_minimaps();
     update_mysky();
     ukaz_mysku();
     showview(0, 0, 0, 0);
@@ -1974,6 +1973,8 @@ void game_keyboard(EVENT_MSG *msg,void **usr)
         case 61:clk_saveload(0, 0, 0, 0, 0);break;
         case 59:game_setup(0,0,0,0,0);break;
         case 63:do_autosave();break;
+        case 0x18:overlay_map_enabled=!overlay_map_enabled;break;   // O: transparent map over the view
+        case 0x29:console_show(!console_is_visible());break;        // ` (grave): console
         case 62:clk_sleep(0,0,0,0,0);break;
         case 64:go_book(0, 0, 0, 0, 0);break;
         case 65:spell_casting(0, 0, 0, 0, 0);break;

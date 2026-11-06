@@ -16,8 +16,13 @@ data class GameSettings(
     val allowPortrait: Boolean = true,
     /** Small map in the corner also outside of battle (engine extra EX_ALWAYS_MINIMAP). */
     val alwaysMinimap: Boolean = false,
+    // game mods ("Úpravy hry")
     /** Remaining lives shown above enemies. */
-    val showEnemyLives: Boolean = false,
+    val enemyLives: EnemyLives = EnemyLives.OFF,
+    /** Darken the view under the transparent map (O key / MAPA+ button). */
+    val overlayMapDim: Boolean = true,
+    /** Speed of the whole game. */
+    val gameSpeed: GameSpeed = GameSpeed.NORMAL,
     /** Size of the game picture in % of the largest size that fits (50..100). */
     val pictureScale: Int = 100,
     // touch controls (Milestone 4)
@@ -78,6 +83,10 @@ data class GameSettings(
     /** ALWAYS = always shown, AUTO = hidden while a gamepad/keyboard is used, NEVER = never shown. */
     enum class TouchMode { ALWAYS, AUTO, NEVER }
 
+    enum class EnemyLives(val ini: String) { OFF("off"), NUMBER("number"), BAR("bar"), BOTH("both") }
+
+    enum class GameSpeed(val ini: String) { NORMAL("normal"), FAST("fast"), FASTER("faster") }
+
     enum class Scaling(val ini: String) { ASPECT("aspect"), INTEGER("integer"), STRETCH("stretch") }
 
     /** Values understood by the engine (crt_filter in skeldal.ini). */
@@ -96,7 +105,9 @@ data class GameSettings(
         "videoScanlines" to videoScanlines,
         "allowPortrait" to allowPortrait,
         "alwaysMinimap" to alwaysMinimap,
-        "showEnemyLives" to showEnemyLives,
+        "enemyLives" to enemyLives.name,
+        "overlayMapDim" to overlayMapDim,
+        "gameSpeed" to gameSpeed.name,
         "pictureScale" to pictureScale,
         "touchMode" to touchMode.name,
         "touchSize" to touchSize,
@@ -144,7 +155,9 @@ data class GameSettings(
                 videoScanlines = (m["videoScanlines"] as? Boolean) ?: d.videoScanlines,
                 allowPortrait = (m["allowPortrait"] as? Boolean) ?: d.allowPortrait,
                 alwaysMinimap = (m["alwaysMinimap"] as? Boolean) ?: d.alwaysMinimap,
-                showEnemyLives = (m["showEnemyLives"] as? Boolean) ?: d.showEnemyLives,
+                enemyLives = enumOr(m["enemyLives"], d.enemyLives),
+                overlayMapDim = (m["overlayMapDim"] as? Boolean) ?: d.overlayMapDim,
+                gameSpeed = enumOr(m["gameSpeed"], d.gameSpeed),
                 pictureScale = ((m["pictureScale"] as? Int) ?: d.pictureScale).coerceIn(50, 100),
                 touchMode = enumOr(m["touchMode"], d.touchMode),
                 touchSize = ((m["touchSize"] as? Int) ?: d.touchSize).coerceIn(50, 200),

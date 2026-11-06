@@ -115,7 +115,7 @@ extern t_points viewport_geometry;
 extern word *buffer_2nd;
 extern char show_names;
 extern char show_lives;
-/// [game] show_enemy_lives: always show the lives of enemies (like the spell), not saved in games
+/// [game] show_enemy_lives: 0 = off, 1 = number (like the spell), 2 = bar, 3 = bar and number; not saved in games
 extern char cfg_show_lives;
 extern char secnd_shade;
 extern char show_mob_info;
@@ -126,6 +126,7 @@ typedef struct drw_enemy_struct
   {
   const void *txtr;
   int celx,cely,posx,posy,adjust,shiftup,num;
+  int maxnum;   ///< maximum lives (for the optional health bar)
   char mirror;
   char stoned;
   const palette_t *palette;

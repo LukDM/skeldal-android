@@ -124,6 +124,7 @@ class GameActivity : SDLActivity() {
             if (touchMode == GameSettings.TouchMode.AUTO) view.controlsVisible = true
         }
         view.onKeyboardButton = { NativeBridge.nativeShowKeyboard() }
+        view.onKeyboardToggle = { NativeBridge.nativeToggleKeyboard() }
         NativeBridge.textInputListener = { active -> overlay?.textInputActive = active }
         addContentView(view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         overlay = view

@@ -2203,7 +2203,7 @@ static void souboje_turn(int smer)
   bott_draw(0);
   other_draw();
   program_draw();
-  draw_medium_map();
+  draw_game_minimaps();
   ukaz_mysku();
   showview(0,0,0,0);
   schovej_mysku();

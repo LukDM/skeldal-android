@@ -795,6 +795,13 @@ void game_show_keyboard(void) {
     SDL_PushEvent(&ev);
 }
 
+void game_toggle_keyboard(void) {
+    SDL_Event ev = {};
+    ev.type = show_keyboard_event_type();
+    ev.user.code = 1;
+    SDL_PushEvent(&ev);
+}
+
 void game_text_input(char active) {
     SDL_Event ev = {};
     ev.type = text_input_event_type();
@@ -985,7 +992,13 @@ void SDLContext::event_loop() {
             set_text_input(e.user.code != 0);
         } else if (e.type == show_keyboard_event_type()) {
 #ifdef __ANDROID__
-            if (_text_input_active) SDL_StartTextInput();   // bring back a keyboard the user closed
+            if (e.user.code == 1) {
+                // keyboard button available always: free typing mode on / off
+                if (_text_input_active && SDL_IsTextInputActive()) set_text_input(false);
+                else set_text_input(true);
+            } else if (_text_input_active) {
+                SDL_StartTextInput();   // bring back a keyboard the user closed
+            }
 #endif
 #ifdef __ANDROID__
         } else if (e.type == SDL_TEXTINPUT) {
@@ -1008,7 +1021,9 @@ void SDLContext::event_loop() {
                     SDL_Scancode sc = e.key.keysym.scancode;
 #ifdef __ANDROID__
                     // in a text field printable characters come as SDL_TEXTINPUT (see above)
+                    // (` stays a key: the touch button KONZOLE closes the console with it)
                     if (_text_input_active && e.key.keysym.sym >= 32 && e.key.keysym.sym < 127
+                            && e.key.keysym.sym != SDLK_BACKQUOTE
                             && !(e.key.keysym.mod & KMOD_CTRL)) {
                         continue;
                     }

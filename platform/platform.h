@@ -127,6 +127,8 @@ void game_text_input(char active);
 void game_set_text_input_listener(void (*listener)(int active));
 /// Shows the soft keyboard again while a text field is open (e.g. after the user closed it).
 void game_show_keyboard(void);
+///mobile: keyboard button that is always available - free typing on / off
+void game_toggle_keyboard(void);
 /// Mutes / unmutes the game audio (e.g. Android audio focus). Thread safe, never blocks:
 /// the change is applied by the SDL event loop.
 void game_set_audio_muted(char muted);

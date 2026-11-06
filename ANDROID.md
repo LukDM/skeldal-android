@@ -93,6 +93,21 @@ Kontrola instalace (podle zdrojového kódu enginu):
 - **Pruhy ve videích**: původní hra kreslí každý druhý řádek videa tmavší; na Androidu je to
   ve výchozím stavu vypnuté (`[video] video_scanlines=`).
 
+- **Klávesnice v dialozích** (např. smlouvání) se otevře sama; volitelné dotykové tlačítko
+  „⌨“ zapne / vypne klávesnici kdykoli.
+
+## Úpravy hry (nad rámec originálu)
+
+Nastavení → Úpravy hry; v `skeldal.ini` sekce `[game]`:
+
+| Volba | Klíč | Význam |
+|---|---|---|
+| Minimapa i mimo boj | `always_minimap` | malá mapa vlevo nahoře (jinak jen v boji) |
+| Životy nepřátel | `show_enemy_lives=off\|number\|bar\|both` | číslo a/nebo proužek nad nepřítelem |
+| Průhledná mapa | klávesa **O**, tlačítko „MAPA+“; `overlay_map_dim` | mapa přes celý 3D pohled, otočená podle směru |
+| Rychlost hry | `game_speed=normal\|fast\|faster` | rychlost celé hry |
+| Konzole | klávesa **`**, tlačítko „KONZOLE“ | příkazy jako `hunter-instinct on`, `true-seeing on`, `iron-skin on` |
+
 Aplikace má ID balíčku `cz.gates.skeldal`.
 
 ## Umístění dat v zařízení

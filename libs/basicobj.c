@@ -727,8 +727,12 @@ void input_line_event(EVENT_MSG *msg,OBJREC *o)
    switch (msg->msg)
      {
      case E_GET_FOCUS:cursor=0;save=(char *)getmem(len+1);
-                      strcpy(save,c);clear_kontext=1;break;
-     case E_LOST_FOCUS:cursor=0;*start=0;free(save);redraw_object(o);break;
+                      strcpy(save,c);clear_kontext=1;
+                      game_text_input(1);   // soft keyboard on mobile (e.g. haggling)
+                      break;
+     case E_LOST_FOCUS:cursor=0;*start=0;free(save);redraw_object(o);
+                      game_text_input(0);
+                      break;
      case E_CURSOR_TICK:
         {
         int xpos,i,j=-1,d;
@@ -821,6 +825,7 @@ void input_line_event(EVENT_MSG *msg,OBJREC *o)
 
 
 void input_line_done(OBJREC *o) {
+    game_text_input(0);
     free(o->userptr);
     o->userptr = NULL;
 }

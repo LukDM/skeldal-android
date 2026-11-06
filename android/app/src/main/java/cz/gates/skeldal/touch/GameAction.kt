@@ -26,13 +26,16 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
     SPELLS(137, "KOUZLA", false),  // KEYCODE_F7
     REST(134, "SPÁT", false),      // KEYCODE_F4
     SETTINGS(131, "NASTAV.", false), // KEYCODE_F1
+    OVERLAY_MAP(43, "MAPA+", false), // KEYCODE_O: transparent map over the view (game mod)
+    CONSOLE(68, "KONZOLE", false),  // KEYCODE_GRAVE: developer console with cheats (game mod)
+    KEYBOARD(-1, "⌨", false),      // not a key: shows / hides the soft keyboard
     ;
 
     companion object {
         /** Buttons shown by default, in this order. */
         val DEFAULT_BUTTONS = listOf(MENU, MAP, ACTION, BATTLE)
         /** Buttons the user can add in the settings. */
-        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS)
+        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, OVERLAY_MAP, CONSOLE)
     }
 }
 

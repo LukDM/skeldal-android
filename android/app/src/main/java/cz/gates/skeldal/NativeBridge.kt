@@ -14,6 +14,9 @@ object NativeBridge {
     /** Opens the on-screen keyboard again (only does something while a text field is active). */
     @JvmStatic external fun nativeShowKeyboard()
 
+    /** Keyboard on / off anywhere (optional touch button). */
+    @JvmStatic external fun nativeToggleKeyboard()
+
     /** Called on the UI thread when a game text field becomes active / inactive. */
     @Volatile var textInputListener: ((Boolean) -> Unit)? = null
 

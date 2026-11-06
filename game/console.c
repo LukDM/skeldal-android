@@ -767,6 +767,7 @@ static void unwire_console(void) {
 void console_show(char show) {
     if (console_visible != show) {
         console_visible = show;
+        game_text_input(show);   // soft keyboard on mobile
         if (show) wire_console();
         else unwire_console();
     }

@@ -11,7 +11,6 @@
     <string name="settings_video_scanlines">Pruhy ve videích (jako originál)</string>
     <string name="settings_allow_portrait">Povolit hru na výšku (obraz nahoře, ovládání dole)</string>
     <string name="settings_always_minimap">Minimapa v rohu i mimo boj</string>
-    <string name="settings_enemy_lives">Zobrazit životy nepřátel (nad hlavou)</string>
     <string name="settings_vsync">Vertikální synchronizace (VSync)</string>
     <string name="settings_crt">Filtr CRT monitoru</string>
     <string name="settings_crt_hint">Napodobuje starý monitor. Projeví se jen při výšce obrazu alespoň 720 pixelů.</string>
@@ -71,6 +70,25 @@ Pokud se nic nestane, tlačítko neposílá do aplikací žádný kód. Na někt
     <string name="settings_language">Jazyk hry</string>
     <string name="settings_language_ok">Importovaná data obsahují tyto jazyky: %1$s.</string>
     <string name="settings_language_missing">Importovaná data neobsahují angličtinu (složku lang/en), hra poběží česky.</string>
+    <string name="settings_section_mods">Úpravy hry</string>
+    <string name="settings_mods_hint">Funkce nad rámec původní hry. Usnadňují hraní, ale mění původní zážitek. Uložené pozice zůstávají kompatibilní s PC.</string>
+    <string name="settings_enemy_lives">Životy nepřátel</string>
+    <string name="settings_overlay_dim">Ztmavit obraz pod průhlednou mapou</string>
+    <string name="settings_overlay_hint">Průhledná mapa přes celý obraz se zapíná a vypíná tlačítkem „MAPA+“ (přidejte ho v Dotykovém ovládání) nebo klávesou O.</string>
+    <string name="settings_game_speed">Rychlost hry</string>
+    <string name="settings_game_speed_hint">Zrychlí celou hru včetně nepřátel. Rychlé souboje lze navíc zapnout v nastavení přímo ve hře.</string>
+    <string name="settings_console_hint">Konzole s cheaty: tlačítko „KONZOLE“ (přidejte ho v Dotykovém ovládání) nebo klávesa ` . Příkazy např. hunter-instinct on (životy), true-seeing on (skryté věci), iron-skin on (nesmrtelnost), ghost-walls on (procházení zdí); vypnutí slovem off.</string>
+    <string-array name="enemy_lives_labels">
+        <item>Vypnuto</item>
+        <item>Číslo</item>
+        <item>Proužek</item>
+        <item>Proužek i číslo</item>
+    </string-array>
+    <string-array name="game_speed_labels">
+        <item>Normální</item>
+        <item>Rychlá</item>
+        <item>Velmi rychlá</item>
+    </string-array>
     <string name="settings_section_data">Data a diagnostika</string>
     <string name="settings_export_log">Export debug logu</string>
     <string name="settings_export_log_hint">Uloží textový soubor s verzemi, informacemi o zařízení a instalaci a s logy posledních spuštění. Hodí se při hlášení chyby. Neobsahuje herní data ani uložené pozice.</string>

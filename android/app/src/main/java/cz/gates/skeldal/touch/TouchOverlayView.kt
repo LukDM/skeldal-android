@@ -50,6 +50,9 @@ class TouchOverlayView(
     /** Tapping the keyboard button (opens the Android keyboard again). */
     var onKeyboardButton: (() -> Unit)? = null
 
+    /** Optional always-visible keyboard button (keyboard on / off). */
+    var onKeyboardToggle: (() -> Unit)? = null
+
     private val density = resources.displayMetrics.density
     private val handler = Handler(Looper.getMainLooper())
     private val gestures = GestureMapper(
@@ -164,7 +167,9 @@ class TouchOverlayView(
 
     private fun press(id: Int, c: TouchLayout.Control) {
         pressed[id] = c
-        if (c.action.repeats) {
+        if (c.action == GameAction.KEYBOARD) {
+            onKeyboardToggle?.invoke()
+        } else if (c.action.repeats) {
             tapKey(c.action)
             handler.postDelayed(repeater(id, c), REPEAT_DELAY_MS)
         } else {
@@ -176,7 +181,7 @@ class TouchOverlayView(
 
     private fun release(id: Int) {
         val c = pressed.remove(id) ?: return
-        if (!c.action.repeats) sink.keyUp(c.action.keyCode)
+        if (!c.action.repeats && c.action.keyCode >= 0) sink.keyUp(c.action.keyCode)
         invalidate()
     }
 

@@ -75,16 +75,6 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_allow_portrait" />
 
-        <Switch
-            android:id="@+id/switch_always_minimap"
-            style="@style/SettingsSwitch"
-            android:text="@string/settings_always_minimap" />
-
-        <Switch
-            android:id="@+id/switch_enemy_lives"
-            style="@style/SettingsSwitch"
-            android:text="@string/settings_enemy_lives" />
-
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_crt" />
@@ -252,6 +242,58 @@
         <TextView
             style="@style/SettingsHint"
             android:text="@string/settings_autosave_bg_hint" />
+
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/settings_section_mods" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_mods_hint" />
+
+        <Switch
+            android:id="@+id/switch_always_minimap"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_always_minimap" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_enemy_lives" />
+
+        <Spinner
+            android:id="@+id/spinner_enemy_lives"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <Switch
+            android:id="@+id/switch_overlay_dim"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_overlay_dim" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_overlay_hint" />
+
+        <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/settings_game_speed" />
+
+        <Spinner
+            android:id="@+id/spinner_game_speed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_game_speed_hint" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_console_hint" />
 
         <TextView
             style="@style/SettingsSection"
