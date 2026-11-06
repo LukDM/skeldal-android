@@ -224,6 +224,18 @@ Java_cz_gates_skeldal_NativeBridge_nativeShowKeyboard(JNIEnv *, jclass) {
     game_show_keyboard();
 }
 
+/// The soft keyboard was closed (GameActivity watches the IME insets).
+extern "C" JNIEXPORT void JNICALL
+Java_cz_gates_skeldal_NativeBridge_nativeKeyboardHidden(JNIEnv *, jclass) {
+    game_keyboard_hidden();
+}
+
+/// Touch buttons whose key must reach the game even while typing (map, console...).
+extern "C" JNIEXPORT void JNICALL
+Java_cz_gates_skeldal_NativeBridge_nativeInjectKey(JNIEnv *, jclass, jint bios_code) {
+    game_inject_key(static_cast<unsigned int>(bios_code));
+}
+
 /// Optional "keyboard" touch button: keyboard on / off anywhere in the game.
 extern "C" JNIEXPORT void JNICALL
 Java_cz_gates_skeldal_NativeBridge_nativeToggleKeyboard(JNIEnv *, jclass) {

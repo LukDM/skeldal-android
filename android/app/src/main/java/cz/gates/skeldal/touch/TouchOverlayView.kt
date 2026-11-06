@@ -50,6 +50,9 @@ class TouchOverlayView(
     /** Tapping the keyboard button (opens the Android keyboard again). */
     var onKeyboardButton: (() -> Unit)? = null
 
+    /** Buttons that put a key directly into the game's queue (map, minimap, console). */
+    var onInjectKey: ((Int) -> Unit)? = null
+
     /** Optional always-visible keyboard button (keyboard on / off). */
     var onKeyboardToggle: (() -> Unit)? = null
 
@@ -173,6 +176,8 @@ class TouchOverlayView(
         pressed[id] = c
         if (c.action == GameAction.KEYBOARD) {
             onKeyboardToggle?.invoke()
+        } else if (c.action.injectCode != 0) {
+            onInjectKey?.invoke(c.action.injectCode)
         } else if (c.action.latched) {
             if (latchedDown.remove(c.action)) sink.keyUp(c.action.keyCode)
             else { latchedDown.add(c.action); sink.keyDown(c.action.keyCode) }

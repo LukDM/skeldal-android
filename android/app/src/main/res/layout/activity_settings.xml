@@ -268,9 +268,29 @@
             android:foreground="@drawable/focus_frame" />
 
         <Switch
-            android:id="@+id/switch_overlay_dim"
+            android:id="@+id/switch_lives_battle"
             style="@style/SettingsSwitch"
+            android:text="@string/settings_lives_battle" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_lives_hint" />
+
+        <TextView
+            style="@style/SettingsLabel"
             android:text="@string/settings_overlay_dim" />
+
+        <Spinner
+            android:id="@+id/spinner_overlay_dim"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:foreground="@drawable/focus_frame" />
+
+        <Switch
+            android:id="@+id/switch_overlay_enemies"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_overlay_enemies" />
 
         <TextView
             style="@style/SettingsHint"

@@ -1773,8 +1773,13 @@ int skeldal_entry_point(const SKELDAL_CONFIG *start_cfg)
           else if (istrcmp(gs, "faster") == 0) gamespeed = 3;
           gamespeedbattle = gamespeed;
       }
-      // [game] overlay_map_dim = darken the view under the transparent map (F8)
-      overlay_map_dim = ini_get_boolean(gsec, "overlay_map_dim", 1) == 1;
+      // [game] overlay_map_dim = off | light | strong (darken the view under the transparent map)
+      {
+          const char *d = ini_get_string(gsec, "overlay_map_dim", "light");
+          overlay_map_dim = (istrcmp(d, "off") == 0) ? 0 : ((istrcmp(d, "strong") == 0) ? 2 : 1);
+      }
+      overlay_map_enemies = ini_get_boolean(gsec, "overlay_map_enemies", 1) == 1;
+      cfg_lives_battle_only = ini_get_boolean(gsec, "enemy_lives_battle_only", 0) == 1;
   }
   if (!change_current_directory(groot)) {
       start_cfg->show_error(concat2("Can't change directory to: ", groot));

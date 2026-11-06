@@ -19,8 +19,12 @@ data class GameSettings(
     // game mods ("Úpravy hry")
     /** Remaining lives shown above enemies. */
     val enemyLives: EnemyLives = EnemyLives.OFF,
+    /** Only during battle (and only monsters taking part). */
+    val enemyLivesBattleOnly: Boolean = false,
     /** Darken the view under the transparent map (O key / MAPA+ button). */
-    val overlayMapDim: Boolean = true,
+    val overlayDim: OverlayDim = OverlayDim.LIGHT,
+    /** Monsters shown on the transparent map. */
+    val overlayEnemies: Boolean = true,
     /** Speed of the whole game. */
     val gameSpeed: GameSpeed = GameSpeed.NORMAL,
     /** Size of the game picture in % of the largest size that fits (50..100). */
@@ -85,6 +89,8 @@ data class GameSettings(
 
     enum class EnemyLives(val ini: String) { OFF("off"), NUMBER("number"), BAR("bar"), BOTH("both") }
 
+    enum class OverlayDim(val ini: String) { OFF("off"), LIGHT("light"), STRONG("strong") }
+
     enum class GameSpeed(val ini: String) { NORMAL("normal"), FAST("fast"), FASTER("faster") }
 
     enum class Scaling(val ini: String) { ASPECT("aspect"), INTEGER("integer"), STRETCH("stretch") }
@@ -106,7 +112,9 @@ data class GameSettings(
         "allowPortrait" to allowPortrait,
         "alwaysMinimap" to alwaysMinimap,
         "enemyLives" to enemyLives.name,
-        "overlayMapDim" to overlayMapDim,
+        "enemyLivesBattleOnly" to enemyLivesBattleOnly,
+        "overlayDim" to overlayDim.name,
+        "overlayEnemies" to overlayEnemies,
         "gameSpeed" to gameSpeed.name,
         "pictureScale" to pictureScale,
         "touchMode" to touchMode.name,
@@ -156,7 +164,9 @@ data class GameSettings(
                 allowPortrait = (m["allowPortrait"] as? Boolean) ?: d.allowPortrait,
                 alwaysMinimap = (m["alwaysMinimap"] as? Boolean) ?: d.alwaysMinimap,
                 enemyLives = enumOr(m["enemyLives"], d.enemyLives),
-                overlayMapDim = (m["overlayMapDim"] as? Boolean) ?: d.overlayMapDim,
+                enemyLivesBattleOnly = (m["enemyLivesBattleOnly"] as? Boolean) ?: d.enemyLivesBattleOnly,
+                overlayDim = enumOr(m["overlayDim"], d.overlayDim),
+                overlayEnemies = (m["overlayEnemies"] as? Boolean) ?: d.overlayEnemies,
                 gameSpeed = enumOr(m["gameSpeed"], d.gameSpeed),
                 pictureScale = ((m["pictureScale"] as? Int) ?: d.pictureScale).coerceIn(50, 100),
                 touchMode = enumOr(m["touchMode"], d.touchMode),

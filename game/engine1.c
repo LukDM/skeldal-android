@@ -107,6 +107,7 @@ void lodka64b(void *source,void *target,void *background,void *xlat,int32_t xysi
 //word *background;
 char nofloors=0,show_names=0,show_lives=0;
 char cfg_show_lives=0;
+char cfg_lives_battle_only=0;
 
 
 /*void zooming1(void *source,int32_t target,word *background,void *xlat,int32_t xysize)
@@ -1295,7 +1296,7 @@ void draw_enemy(DRW_ENEMY *drw)
                     last_scale, y + 1, (clipr << 16) + clipl);
         }
     }
-    if (cfg_show_lives & 2) {
+    if ((cfg_show_lives & 2) && drw->show_cfg_lives) {
         // health bar above the enemy: green -> yellow -> red
         int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6 - ((show_lives || (cfg_show_lives & 1)) ? 14 : 0);
         int bw = 40, bh = 5;
@@ -1314,7 +1315,7 @@ void draw_enemy(DRW_ENEMY *drw)
             RestoreScreen();
         }
     }
-    if (show_lives || (cfg_show_lives & 1)) {
+    if (show_lives || ((cfg_show_lives & 1) && drw->show_cfg_lives)) {
         char s[25];
 
         int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6;

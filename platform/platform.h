@@ -129,6 +129,10 @@ void game_set_text_input_listener(void (*listener)(int active));
 void game_show_keyboard(void);
 ///mobile: keyboard button that is always available - free typing on / off
 void game_toggle_keyboard(void);
+///mobile: the soft keyboard was closed by the user (ends the free typing mode)
+void game_keyboard_hidden(void);
+///puts a key (BIOS code: scan code << 8 | character) straight into the game's keyboard queue
+void game_inject_key(unsigned int bios_code);
 /// Mutes / unmutes the game audio (e.g. Android audio focus). Thread safe, never blocks:
 /// the change is applied by the SDL event loop.
 void game_set_audio_muted(char muted);

@@ -26,12 +26,22 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
     SPELLS(137, "KOUZLA", false),  // KEYCODE_F7
     REST(134, "SPÁT", false),      // KEYCODE_F4
     SETTINGS(131, "NASTAV.", false), // KEYCODE_F1
-    OVERLAY_MAP(43, "MAPA+", false), // KEYCODE_O: transparent map over the view (game mod)
-    CONSOLE(68, "KONZOLE", false),  // KEYCODE_GRAVE: developer console with cheats (game mod)
+    // game mods: keys injected straight into the game (see injectCode), so they work while typing
+    OVERLAY_MAP(-1, "MAPA+", false), // O: transparent map over the view
+    MINIMAP(-1, "MINIMAPA", false),  // N: minimap on / off
+    CONSOLE(-1, "KONZOLE", false),   // `: developer console with cheats
     KEYBOARD(-1, "⌨", false),      // not a key: shows / hides the soft keyboard
     CTRL(113, "CTRL", false),       // KEYCODE_CTRL_LEFT, latched: tap = held until tapped again (Ctrl + tap on a portrait = split the group)
     MERGE(124, "SLOUČIT", false),   // KEYCODE_INSERT: merge all characters standing on one square
     ;
+
+    /** BIOS key code (scan code << 8 | character) put directly into the game's queue, 0 = none. */
+    val injectCode: Int get() = when (this) {
+        OVERLAY_MAP -> 0x1800   // O (scan code only: not typed as text, e.g. into the console)
+        MINIMAP -> 0x3100       // N
+        CONSOLE -> 0x2900       // `
+        else -> 0
+    }
 
     /** Latched buttons stay pressed after a tap until they are tapped again. */
     val latched: Boolean get() = this == CTRL
@@ -40,7 +50,7 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
         /** Buttons shown by default, in this order. */
         val DEFAULT_BUTTONS = listOf(MENU, MAP, ACTION, BATTLE)
         /** Buttons the user can add in the settings. */
-        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, CTRL, MERGE, OVERLAY_MAP, CONSOLE)
+        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, CTRL, MERGE, OVERLAY_MAP, MINIMAP, CONSOLE)
     }
 }
 

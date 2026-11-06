@@ -311,8 +311,10 @@ protected:
 
     SDL_Rect get_window_aspect_rect() const;
     SDL_Point window_to_output(const SDL_Point &pt) const;
-    void set_text_input(bool active);
+    void set_text_input(bool active, bool notify = true);
     bool _text_input_active = false;
+    /// typing enabled by the keyboard touch button, not by a game text field
+    bool _text_input_forced = false;
     static SDL_Rect to_window_rect(const SDL_Rect &winrc, const SDL_Rect &source_rect) ;
     static SDL_Point to_window_point(const SDL_Rect &win_rec, const SDL_Point &pt) ;
     static SDL_Point to_source_point(const SDL_Rect &win_rec, const SDL_Point &win_pt) ;

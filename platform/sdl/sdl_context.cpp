@@ -802,6 +802,25 @@ void game_toggle_keyboard(void) {
     SDL_PushEvent(&ev);
 }
 
+void game_keyboard_hidden(void) {
+    SDL_Event ev = {};
+    ev.type = show_keyboard_event_type();
+    ev.user.code = 2;
+    SDL_PushEvent(&ev);
+}
+
+static Uint32 inject_key_event_type() {
+    static const Uint32 type = SDL_RegisterEvents(1);
+    return type;
+}
+
+void game_inject_key(unsigned int bios_code) {
+    SDL_Event ev = {};
+    ev.type = inject_key_event_type();
+    ev.user.code = static_cast<Sint32>(bios_code);
+    SDL_PushEvent(&ev);
+}
+
 void game_text_input(char active) {
     SDL_Event ev = {};
     ev.type = text_input_event_type();
@@ -809,9 +828,10 @@ void game_text_input(char active) {
     SDL_PushEvent(&ev);
 }
 
-void SDLContext::set_text_input(bool active) {
+void SDLContext::set_text_input(bool active, bool notify) {
     _text_input_active = active;
-    if (g_text_input_listener) g_text_input_listener(active ? 1 : 0);
+    // the "keyboard" banner is only for game text fields, not for the free typing mode
+    if (g_text_input_listener) g_text_input_listener(active && notify ? 1 : 0);
 #ifdef __ANDROID__
     // shows / hides the soft keyboard
     if (active) SDL_StartTextInput(); else SDL_StopTextInput();
@@ -989,13 +1009,31 @@ void SDLContext::event_loop() {
         } else if (e.type == SDL_RENDER_TARGETS_RESET || e.type == SDL_RENDER_DEVICE_RESET) {
             update_screen(true);
         } else if (e.type == text_input_event_type()) {
+            _text_input_forced = false;
             set_text_input(e.user.code != 0);
+        } else if (e.type == inject_key_event_type()) {
+            // key from a touch button that must not be swallowed as text (see the keyboard filter below)
+            std::lock_guard _(_mx);
+            _keyboard_queue.push(static_cast<uint32_t>(e.user.code));
         } else if (e.type == show_keyboard_event_type()) {
 #ifdef __ANDROID__
             if (e.user.code == 1) {
                 // keyboard button available always: free typing mode on / off
-                if (_text_input_active && SDL_IsTextInputActive()) set_text_input(false);
-                else set_text_input(true);
+                if (_text_input_forced) {
+                    _text_input_forced = false;
+                    set_text_input(false);
+                } else if (_text_input_active) {
+                    SDL_StartTextInput();        // a game text field: just show the keyboard again
+                } else {
+                    _text_input_forced = true;
+                    set_text_input(true, false);
+                }
+            } else if (e.user.code == 2) {
+                // the user closed the soft keyboard: free typing mode ends, a text field stays active
+                if (_text_input_forced) {
+                    _text_input_forced = false;
+                    set_text_input(false);
+                }
             } else if (_text_input_active) {
                 SDL_StartTextInput();   // bring back a keyboard the user closed
             }

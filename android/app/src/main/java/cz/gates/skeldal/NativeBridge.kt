@@ -17,6 +17,12 @@ object NativeBridge {
     /** Keyboard on / off anywhere (optional touch button). */
     @JvmStatic external fun nativeToggleKeyboard()
 
+    /** The soft keyboard was closed by the user. */
+    @JvmStatic external fun nativeKeyboardHidden()
+
+    /** Key straight into the game's queue (BIOS code), bypassing the text input filter. */
+    @JvmStatic external fun nativeInjectKey(biosCode: Int)
+
     /** Called on the UI thread when a game text field becomes active / inactive. */
     @Volatile var textInputListener: ((Boolean) -> Unit)? = null
 

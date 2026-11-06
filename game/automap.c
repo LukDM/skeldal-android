@@ -772,8 +772,10 @@ static char mob_not_invis(int sector)
 
 /// transparent map over the 3D view (toggled by the O key), see draw_game_minimaps()
 char overlay_map_enabled = 0;
-/// darken the 3D view under the overlay map ([game] overlay_map_dim)
+/// darken the 3D view under the overlay map ([game] overlay_map_dim): 0 off, 1 light, 2 strong
 char overlay_map_dim = 1;
+/// show monsters on the overlay map ([game] overlay_map_enemies)
+char overlay_map_enemies = 1;
 
 /// Map drawn over the whole 3D view without a background ("Diablo style"): the explored part of
 /// the level around the party, rotated so that forward is up, the party in the center.
@@ -786,7 +788,8 @@ void draw_overlay_map(void)
   int yr=map_coord[viewsector].y;
   int i,j,k,xc=0,yc=0,x,y;
 
-  if (overlay_map_dim) trans_bar(0,17,640,360,0);
+  if (overlay_map_dim == 1) trans_bar25(0,17,640,360);
+  else if (overlay_map_dim >= 2) trans_bar(0,17,640,360,0);
   for(j=0;j<2;j++)
      for(i=1;i<mapsize;i++)
         if (map_coord[i].flags & 1 && map_coord[i].layer==layer)
@@ -803,7 +806,7 @@ void draw_overlay_map(void)
            if (y<17 || y+8>=377 || x<0 || x+8>=640) continue;
            draw_amap_sector(x,y,i,j,viewdir &3,MEDIUM_MAP_LINE1,MEDIUM_MAP_LINE2);
            if (!j) continue;
-           if (mob_map[i] && mob_not_invis(i))
+           if (overlay_map_enemies && mob_map[i] && mob_not_invis(i))
               {
               position(x+1,y+1);set_font(H_FSYMB,AUTOMAP_MOB);
               outtext("N");

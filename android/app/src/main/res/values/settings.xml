@@ -73,8 +73,16 @@ Pokud se nic nestane, tlačítko neposílá do aplikací žádný kód. Na někt
     <string name="settings_section_mods">Úpravy hry</string>
     <string name="settings_mods_hint">Funkce nad rámec původní hry. Usnadňují hraní, ale mění původní zážitek. Uložené pozice zůstávají kompatibilní s PC.</string>
     <string name="settings_enemy_lives">Životy nepřátel</string>
-    <string name="settings_overlay_dim">Ztmavit obraz pod průhlednou mapou</string>
-    <string name="settings_overlay_hint">Průhledná mapa přes celý obraz se zapíná a vypíná tlačítkem „MAPA+“ (přidejte ho v Dotykovém ovládání) nebo klávesou O.</string>
+    <string name="settings_overlay_dim">Ztmavení obrazu pod průhlednou mapou</string>
+    <string name="settings_overlay_enemies">Nepřátelé na průhledné mapě</string>
+    <string name="settings_lives_battle">Životy nepřátel jen v boji</string>
+    <string name="settings_lives_hint">Ukazují se jen u nestvůr, které bojují – ne u postav s rozhovorem. V boji jen u nestvůr, které se ho účastní.</string>
+    <string-array name="overlay_dim_labels">
+        <item>Vypnuto</item>
+        <item>Slabé</item>
+        <item>Silné</item>
+    </string-array>
+    <string name="settings_overlay_hint">Průhledná mapa přes celý obraz se zapíná a vypíná tlačítkem „MAPA+“ nebo klávesou O, minimapa tlačítkem „MINIMAPA“ nebo klávesou N (tlačítka přidáte v Dotykovém ovládání).</string>
     <string name="settings_game_speed">Rychlost hry</string>
     <string name="settings_game_speed_hint">Zrychlí celou hru včetně nepřátel. Rychlé souboje lze navíc zapnout v nastavení přímo ve hře.</string>
     <string name="settings_console_hint">Konzole s cheaty: tlačítko „KONZOLE“ (přidejte ho v Dotykovém ovládání) nebo klávesa ` . Příkazy např. hunter-instinct on (životy), true-seeing on (skryté věci), iron-skin on (nesmrtelnost), ghost-walls on (procházení zdí); vypnutí slovem off.</string>

@@ -1021,6 +1021,15 @@ static void CheckMobStoned(int num)
 
 }
 
+/// [game] show_enemy_lives: only for monsters that fight (in battle: the ones taking part,
+/// otherwise: no dialog and not a creature that always flees), optionally only in battle
+static char mob_shows_cfg_lives(const TMOB *m) {
+    if (!cfg_show_lives) return 0;
+    if (battle) return (m->vlajky & MOB_IN_BATTLE) != 0;
+    if (cfg_lives_battle_only) return 0;
+    return m->dialog < 0 && m->flee_num < 100;
+}
+
 static void fill_drw_enemy_struct(TMOB *m, DRW_ENEMY *enm, char *buff, int curdir) {
     if (!show_mob_info) {
         enm->more_info = NULL;
@@ -1115,6 +1124,7 @@ void draw_mob_call(int num,int curdir,int celx,int cely,char shiftup)
   drw1.shiftup=shiftup;
   drw1.num=p->lives;
   drw1.maxnum=p->vlastnosti[VLS_MAXHIT];
+  drw1.show_cfg_lives=mob_shows_cfg_lives(p);
   drw1.palette=mob_select_palette(p);
   drw1.stoned= (p->vlastnosti[VLS_KOUZLA] & SPL_STONED)!=0;
   see_monster|=(~p->vlajky & MOB_PASSABLE);
@@ -1143,6 +1153,7 @@ void draw_mob_call(int num,int curdir,int celx,int cely,char shiftup)
      drw2.adjust=q->adjusting[view2.face];
      drw2.num=q->lives;
      drw2.maxnum=q->vlastnosti[VLS_MAXHIT];
+     drw2.show_cfg_lives=mob_shows_cfg_lives(q);
      drw2.palette=mob_select_palette(q);
      drw2.stoned=(q->vlastnosti[VLS_KOUZLA] & SPL_STONED)!=0;
      see_monster|=(~q->vlajky & MOB_PASSABLE);

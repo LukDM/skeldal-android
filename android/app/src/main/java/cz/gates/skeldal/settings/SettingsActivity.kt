@@ -30,7 +30,10 @@ class SettingsActivity : Activity() {
     private lateinit var portrait: Switch
     private lateinit var minimap: Switch
     private lateinit var enemyLives: Spinner
-    private lateinit var overlayDim: Switch
+    private lateinit var overlayDim: Spinner
+    private lateinit var overlayEnemies: Switch
+    private lateinit var livesBattle: Switch
+    private val overlayDimValues = GameSettings.OverlayDim.values()
     private lateinit var gameSpeed: Spinner
     private val enemyLivesValues = GameSettings.EnemyLives.values()
     private val gameSpeedValues = GameSettings.GameSpeed.values()
@@ -77,7 +80,9 @@ class SettingsActivity : Activity() {
         portrait = findViewById(R.id.switch_allow_portrait)
         minimap = findViewById(R.id.switch_always_minimap)
         enemyLives = findViewById(R.id.spinner_enemy_lives)
-        overlayDim = findViewById(R.id.switch_overlay_dim)
+        overlayDim = findViewById(R.id.spinner_overlay_dim)
+        overlayEnemies = findViewById(R.id.switch_overlay_enemies)
+        livesBattle = findViewById(R.id.switch_lives_battle)
         gameSpeed = findViewById(R.id.spinner_game_speed)
         size = findViewById(R.id.seek_touch_size)
         picture = findViewById(R.id.seek_picture_scale)
@@ -107,6 +112,7 @@ class SettingsActivity : Activity() {
         crt.adapter = adapter(R.array.crt_labels)
         enemyLives.adapter = adapter(R.array.enemy_lives_labels)
         gameSpeed.adapter = adapter(R.array.game_speed_labels)
+        overlayDim.adapter = adapter(R.array.overlay_dim_labels)
         touchMode.adapter = adapter(R.array.touch_mode_labels)
         autosaveBg = findViewById(R.id.switch_autosave_bg)
         val optBox = findViewById<android.widget.LinearLayout>(R.id.optional_buttons)
@@ -122,6 +128,7 @@ class SettingsActivity : Activity() {
             cz.gates.skeldal.touch.GameAction.CTRL to "CTRL (zamykací – s klepnutím na portrét rozdělí skupinu)",
             cz.gates.skeldal.touch.GameAction.MERGE to "SLOUČIT (Insert – spojí postavy na jednom políčku)",
             cz.gates.skeldal.touch.GameAction.OVERLAY_MAP to "MAPA+ (O – průhledná mapa přes obraz)",
+            cz.gates.skeldal.touch.GameAction.MINIMAP to "MINIMAPA (N – minimapa zapnout / vypnout)",
             cz.gates.skeldal.touch.GameAction.CONSOLE to "KONZOLE (` – konzole s cheaty)",
         )
         for (a in cz.gates.skeldal.touch.GameAction.OPTIONAL_BUTTONS) {
@@ -149,8 +156,8 @@ class SettingsActivity : Activity() {
         show(store.load())
 
         val select = SimpleSelect { save() }
-        for (sp in listOf(scaling, crt, touchMode, language, enemyLives, gameSpeed)) sp.onItemSelectedListener = select
-        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, overlayDim, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
+        for (sp in listOf(scaling, crt, touchMode, language, enemyLives, gameSpeed, overlayDim)) sp.onItemSelectedListener = select
+        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, overlayEnemies, livesBattle, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
                           ctrlEnabled, swapSticks, autosaveBg) + optionalSwitches.values) {
             sw.setOnCheckedChangeListener { _, _ -> save() }
         }
@@ -208,7 +215,9 @@ class SettingsActivity : Activity() {
         portrait.isChecked = s.allowPortrait
         minimap.isChecked = s.alwaysMinimap
         enemyLives.setSelection(enemyLivesValues.indexOf(s.enemyLives))
-        overlayDim.isChecked = s.overlayMapDim
+        overlayDim.setSelection(overlayDimValues.indexOf(s.overlayDim))
+        overlayEnemies.isChecked = s.overlayEnemies
+        livesBattle.isChecked = s.enemyLivesBattleOnly
         gameSpeed.setSelection(gameSpeedValues.indexOf(s.gameSpeed))
         size.progress = s.touchSize - 50
         picture.progress = s.pictureScale - 50
@@ -240,7 +249,9 @@ class SettingsActivity : Activity() {
                 allowPortrait = portrait.isChecked,
                 alwaysMinimap = minimap.isChecked,
                 enemyLives = enemyLivesValues[enemyLives.selectedItemPosition.coerceIn(enemyLivesValues.indices)],
-                overlayMapDim = overlayDim.isChecked,
+                overlayDim = overlayDimValues[overlayDim.selectedItemPosition.coerceIn(overlayDimValues.indices)],
+                overlayEnemies = overlayEnemies.isChecked,
+                enemyLivesBattleOnly = livesBattle.isChecked,
                 gameSpeed = gameSpeedValues[gameSpeed.selectedItemPosition.coerceIn(gameSpeedValues.indices)],
                 pictureScale = pictureValue(),
                 touchMode = touchModeValues[touchMode.selectedItemPosition.coerceIn(touchModeValues.indices)],

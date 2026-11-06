@@ -113,9 +113,9 @@ Nastavení → Úpravy hry; v `skeldal.ini` sekce `[game]`:
 
 | Volba | Klíč | Význam |
 |---|---|---|
-| Minimapa i mimo boj | `always_minimap` | malá mapa vlevo nahoře (jinak jen v boji) |
-| Životy nepřátel | `show_enemy_lives=off\|number\|bar\|both` | číslo a/nebo proužek nad nepřítelem |
-| Průhledná mapa | klávesa **O**, tlačítko „MAPA+“; `overlay_map_dim` | mapa přes celý 3D pohled, otočená podle směru |
+| Minimapa i mimo boj | `always_minimap`, klávesa **N**, tlačítko „MINIMAPA“ | malá mapa vlevo nahoře (jinak jen v boji) |
+| Životy nepřátel | `show_enemy_lives=off\|number\|bar\|both`, `enemy_lives_battle_only` | číslo a/nebo proužek nad bojujícími nestvůrami |
+| Průhledná mapa | klávesa **O**, tlačítko „MAPA+“; `overlay_map_dim=off\|light\|strong`, `overlay_map_enemies` | mapa přes celý 3D pohled, otočená podle směru |
 | Rychlost hry | `game_speed=normal\|fast\|faster` | rychlost celé hry |
 | Konzole | klávesa **`**, tlačítko „KONZOLE“ | příkazy jako `hunter-instinct on`, `true-seeing on`, `iron-skin on` |
 

@@ -88,6 +88,23 @@ class GameActivity : SDLActivity() {
     }
 
     @Volatile private var allowPortrait = true
+    private var imeShown = false
+
+    /** Tells the engine when the user closes the soft keyboard (ends the free typing mode). */
+    private fun watchKeyboard() {
+        val root = window.decorView
+        root.viewTreeObserver.addOnGlobalLayoutListener {
+            val shown = if (android.os.Build.VERSION.SDK_INT >= 30) {
+                root.rootWindowInsets?.isVisible(android.view.WindowInsets.Type.ime()) == true
+            } else {
+                val r = android.graphics.Rect()
+                root.getWindowVisibleDisplayFrame(r)
+                root.height - r.bottom > root.height * 0.15
+            }
+            if (imeShown && !shown) NativeBridge.nativeKeyboardHidden()
+            imeShown = shown
+        }
+    }
 
     private fun orientation() =
         if (allowPortrait) ActivityInfo.SCREEN_ORIENTATION_FULL_USER   // respects the system rotation lock
@@ -125,6 +142,8 @@ class GameActivity : SDLActivity() {
         }
         view.onKeyboardButton = { NativeBridge.nativeShowKeyboard() }
         view.onKeyboardToggle = { NativeBridge.nativeToggleKeyboard() }
+        view.onInjectKey = { NativeBridge.nativeInjectKey(it) }
+        watchKeyboard()
         NativeBridge.textInputListener = { active -> overlay?.textInputActive = active }
         addContentView(view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         overlay = view

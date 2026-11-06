@@ -763,6 +763,7 @@ void draw_overlay_map(void);
 void draw_game_minimaps(void);
 extern char overlay_map_enabled;
 extern char overlay_map_dim;
+extern char overlay_map_enemies;
 void anim_sipky(int h,int mode);
 void redraw_scene(void);
 void calc_game(void);

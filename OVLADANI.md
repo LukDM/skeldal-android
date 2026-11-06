@@ -47,6 +47,7 @@ Zapínají se v Nastavení → Dotykové ovládání.
 | CTRL | Ctrl | **zamykací**: klepnutím se zapne (tlačítko svítí), dalším klepnutím vypne |
 | SLOUČIT | Insert | sloučí do jedné skupiny všechny postavy na jednom políčku |
 | MAPA+ | O | průhledná mapa přes obraz (Úpravy hry) |
+| MINIMAPA | N | minimapa v rohu zapnout / vypnout (Úpravy hry) |
 | KONZOLE | ` | konzole s příkazy (Úpravy hry) |
 
 ### Rozmístění a velikost tlačítek
@@ -144,6 +145,7 @@ Vybraná skupina má jména bíle a portréty prosvětlené. Ostatní skupiny ma
 | Insert | sloučit skupinu |
 | **V boji:** F8 / F9 / F10 / F11 / F12 / Backspace | útok / pohyb / výzbroj / útěk / žádná akce / zrušit |
 | O | průhledná mapa |
+| N | minimapa zapnout / vypnout |
 | ` | konzole |
 
 ---
@@ -152,12 +154,12 @@ Vybraná skupina má jména bíle a portréty prosvětlené. Ostatní skupiny ma
 
 V Nastavení → Úpravy hry:
 
-- **Minimapa v rohu i mimo boj**: malá mapa vlevo nahoře, jinak je jen v boji.
-- **Životy nepřátel**: číslo, proužek nebo obojí nad nepřítelem. Číslo je stejné jako u kouzla Stav nepřítele.
+- **Minimapa v rohu i mimo boj**: malá mapa vlevo nahoře, jinak je jen v boji. Ve hře se přepíná tlačítkem MINIMAPA nebo klávesou N.
+- **Životy nepřátel**: číslo, proužek nebo obojí nad nepřítelem. Číslo je stejné jako u kouzla Stav nepřítele. Ukazuje se jen u nestvůr, které bojují, a volitelně jen v boji.
 - **Průhledná mapa**: zapíná se tlačítkem MAPA+ nebo klávesou O.
   - Ukazuje prozkoumanou část patra přes celý pohled.
   - Je otočená podle směru chůze a družina je uprostřed.
-  - Obraz pod ní jde ztmavit.
+  - Obraz pod ní jde ztmavit (slabě nebo silně) a nepřátele na ní jde skrýt.
 - **Rychlost hry**: normální, rychlá nebo velmi rychlá.
 - **Konzole**: tlačítko KONZOLE nebo klávesa `.
   - Příkazy: `hunter-instinct on` (životy), `true-seeing on` (skryté stěny), `iron-skin on` (nesmrtelnost), `ghost-walls on` (procházení zdí).

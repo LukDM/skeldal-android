@@ -117,6 +117,8 @@ extern char show_names;
 extern char show_lives;
 /// [game] show_enemy_lives: 0 = off, 1 = number (like the spell), 2 = bar, 3 = bar and number; not saved in games
 extern char cfg_show_lives;
+/// [game] enemy_lives_battle_only: the lives (cfg_show_lives) only during battle
+extern char cfg_lives_battle_only;
 extern char secnd_shade;
 extern char show_mob_info;
 
@@ -127,6 +129,7 @@ typedef struct drw_enemy_struct
   const void *txtr;
   int celx,cely,posx,posy,adjust,shiftup,num;
   int maxnum;   ///< maximum lives (for the optional health bar)
+  char show_cfg_lives; ///< [game] show_enemy_lives applies to this one (hostile, battle filter)
   char mirror;
   char stoned;
   const palette_t *palette;

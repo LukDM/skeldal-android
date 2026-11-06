@@ -1974,6 +1974,7 @@ void game_keyboard(EVENT_MSG *msg,void **usr)
         case 59:game_setup(0,0,0,0,0);break;
         case 63:do_autosave();break;
         case 0x18:overlay_map_enabled=!overlay_map_enabled;break;   // O: transparent map over the view
+        case 0x31:game_extras^=EX_ALWAYS_MINIMAP;break;              // N: minimap on / off
         case 0x29:console_show(!console_is_visible());break;        // ` (grave): console
         case 62:clk_sleep(0,0,0,0,0);break;
         case 64:go_book(0, 0, 0, 0, 0);break;
