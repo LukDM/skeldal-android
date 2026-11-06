@@ -110,4 +110,18 @@ class SaveSyncTest {
         // the shared file still has only A's save
         assertEquals(setOf("sav.00000003.0001"), a.readRemote { shared.inputStream() }.entries.keys)
     }
+
+    @Test
+    fun deleteAllBacksUpFirst() {
+        val (dir, _) = device("D")
+        save(dir, "sav.00000004.0001", "x", 1_000_000)
+        save(dir, "sav.00000004.0002", "y", 2_000_000)
+        val m = SaveGameManager(dir, tmp.newFolder("D-bk"))
+        val (n, backup) = m.deleteAll("test")
+        assertEquals(2, n)
+        assertTrue(SaveGameManager.saveFiles(dir).isEmpty())
+        assertTrue(backup != null && backup.exists())
+        m.restore(backup!!, "test")
+        assertEquals(2, SaveGameManager.saveFiles(dir).size)
+    }
 }

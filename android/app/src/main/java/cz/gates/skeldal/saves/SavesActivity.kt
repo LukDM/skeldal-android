@@ -46,10 +46,12 @@ class SavesActivity : Activity() {
         val import = findViewById<Button>(R.id.btn_saves_import)
         val restore = findViewById<Button>(R.id.btn_saves_restore)
         val close = findViewById<Button>(R.id.btn_saves_close)
+        val delete = findViewById<Button>(R.id.btn_saves_delete)
+        delete.setOnClickListener { confirmDelete() }
         syncInfo = findViewById(R.id.sync_info)
         syncRun = findViewById(R.id.btn_sync_run)
         val syncChoose = findViewById<Button>(R.id.btn_sync_choose)
-        buttons = listOf(export, import, restore, close, syncRun, syncChoose)
+        buttons = listOf(export, import, restore, delete, close, syncRun, syncChoose)
         syncRun.setOnClickListener { syncPrepare() }
         syncChoose.setOnClickListener { chooseSyncFile() }
 
@@ -86,6 +88,28 @@ class SavesActivity : Activity() {
             DateFormat.getDateTimeInstance().format(Date(s.newest)), (s.totalBytes + 1023) / 1024)
         findViewById<Button>(R.id.btn_saves_export).isEnabled = s.count > 0
         findViewById<Button>(R.id.btn_saves_restore).isEnabled = manager.backups().isNotEmpty()
+        findViewById<Button>(R.id.btn_saves_delete).isEnabled = s.count > 0
+    }
+
+    private fun confirmDelete() {
+        val n = manager.summary().count
+        if (n == 0) return
+        if (gameRunning()) {
+            AlertDialog.Builder(this).setMessage(R.string.sync_game_running).setPositiveButton(android.R.string.ok, null).show()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.saves_delete_title)
+            .setMessage(getString(R.string.saves_delete_confirm, n))
+            .setPositiveButton(R.string.saves_delete_do) { _, _ ->
+                background {
+                    val (deleted, _) = manager.deleteAll(version())
+                    ui.post { syncStatus() }
+                    getString(R.string.saves_deleted, deleted)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     @Deprecated("Deprecated in Java")

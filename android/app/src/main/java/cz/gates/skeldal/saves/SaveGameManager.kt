@@ -57,6 +57,15 @@ class SaveGameManager(private val savesDir: File, private val backupDir: File) {
             ImportResult(incoming.size, skipped, safety)
         }
 
+    /** Deletes all savegames on this device; they are backed up first. Returns (deleted, backup). */
+    fun deleteAll(appVersion: String): Pair<Int, File?> {
+        val backup = backupCurrent(appVersion)
+        val files = saveFiles(savesDir)
+        var n = 0
+        for (f in files) if (f.delete()) n++
+        return n to backup
+    }
+
     /** Backups made automatically before each import, newest first. */
     fun backups(): List<File> =
         (backupDir.listFiles { f -> f.isFile && f.name.endsWith(".zip") } ?: emptyArray())

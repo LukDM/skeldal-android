@@ -43,6 +43,11 @@
             style="@style/LauncherButton"
             android:text="@string/saves_restore" />
 
+        <Button
+            android:id="@+id/btn_saves_delete"
+            style="@style/LauncherButton"
+            android:text="@string/saves_delete" />
+
         <TextView
             style="@style/SettingsHint"
             android:layout_marginTop="16dp"

@@ -16,6 +16,11 @@
     <string name="saves_restore_do">Obnovit</string>
     <string name="saves_restored">Obnoveno pozic: %1$d.</string>
     <string name="saves_failed">Operace se nezdařila.</string>
+    <string name="saves_delete">Smazat pozice v tomto zařízení</string>
+    <string name="saves_delete_title">Smazat uložené pozice?</string>
+    <string name="saves_delete_confirm">Smaže se všech %1$d uložených pozic v tomto zařízení.\n\nPozice v cloudu (synchronizační soubor) ani na jiných zařízeních se nezmění. Před smazáním se vytvoří záloha, takže je lze vrátit přes „Obnovit ze zálohy“.</string>
+    <string name="saves_delete_do">Smazat</string>
+    <string name="saves_deleted">Smazáno pozic: %1$d.\nZáloha je v „Obnovit ze zálohy“.</string>
     <string name="sync_title">Synchronizace mezi zařízeními</string>
     <string name="sync_run">Synchronizovat…</string>
     <string name="sync_choose">Nastavit synchronizační soubor</string>
