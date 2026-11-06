@@ -98,6 +98,15 @@ Kontrola instalace (podle zdrojového kódu enginu):
 - **Klávesnice v dialozích** (např. smlouvání) se otevře sama; volitelné dotykové tlačítko
   „⌨“ zapne / vypne klávesnici kdykoli.
 
+## Synchronizace pozic mezi zařízeními
+
+Uložené pozice → Synchronizace. Na prvním zařízení se vytvoří synchronizační soubor
+(`skeldal-sync.zip`, např. na Google Disku přes systémový výběr souborů), na dalších se vybere
+tentýž. Tlačítko **Synchronizovat** porovná pozice podle času uložení: novější verze vyhrává,
+nic se nemaže, před stažením se vytvoří záloha. Soubor obsahuje pozice a manifest
+`skeldal-sync.txt` (přesné časy, které zařízení pozici zapsalo, kdy se které zařízení naposledy
+synchronizovalo). Nepotřebuje žádný server ani API klíč.
+
 ## Úpravy hry (nad rámec originálu)
 
 Nastavení → Úpravy hry; v `skeldal.ini` sekce `[game]`:

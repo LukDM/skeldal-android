@@ -1,10 +1,15 @@
 package cz.gates.skeldal.saves
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.provider.Settings
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -26,6 +31,9 @@ class SavesActivity : Activity() {
     private lateinit var info: TextView
     private lateinit var progress: ProgressBar
     private lateinit var buttons: List<Button>
+    private lateinit var syncInfo: TextView
+    private lateinit var syncRun: Button
+    private val syncPrefs by lazy { getSharedPreferences("sync", Context.MODE_PRIVATE) }
     private val ui = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +46,12 @@ class SavesActivity : Activity() {
         val import = findViewById<Button>(R.id.btn_saves_import)
         val restore = findViewById<Button>(R.id.btn_saves_restore)
         val close = findViewById<Button>(R.id.btn_saves_close)
-        buttons = listOf(export, import, restore, close)
+        syncInfo = findViewById(R.id.sync_info)
+        syncRun = findViewById(R.id.btn_sync_run)
+        val syncChoose = findViewById<Button>(R.id.btn_sync_choose)
+        buttons = listOf(export, import, restore, close, syncRun, syncChoose)
+        syncRun.setOnClickListener { syncPrepare() }
+        syncChoose.setOnClickListener { chooseSyncFile() }
 
         export.setOnClickListener {
             val name = "skeldal-pozice-" + SimpleDateFormat("yyyy-MM-dd-HHmm", Locale.ROOT).format(Date()) + ".zip"
@@ -63,6 +76,7 @@ class SavesActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refresh()
+        syncStatus()
     }
 
     private fun refresh() {
@@ -80,6 +94,16 @@ class SavesActivity : Activity() {
         val uri: Uri = data?.data ?: return
         if (resultCode != RESULT_OK) return
         when (requestCode) {
+            REQ_SYNC_NEW, REQ_SYNC_OPEN -> {
+                try {
+                    contentResolver.takePersistableUriPermission(uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                } catch (e: SecurityException) {
+                    // provider without persistable permissions: works until the app is restarted
+                }
+                syncPrefs.edit().putString(KEY_URI, uri.toString()).apply()
+                syncStatus()
+            }
             REQ_EXPORT -> background {
                 val out = contentResolver.openOutputStream(uri, "wt") ?: throw ImportException("Soubor nelze vytvořit.")
                 val n = out.use { manager.export(it, version()) }
@@ -90,6 +114,126 @@ class SavesActivity : Activity() {
                 getString(R.string.saves_imported, r.imported) + if (r.backup != null) "\n\n" + getString(R.string.saves_backup_made) else ""
             }
         }
+    }
+
+    // ---- synchronisation (see SaveSync) ---------------------------------------------------
+
+    private fun syncUri(): Uri? = syncPrefs.getString(KEY_URI, null)?.let { Uri.parse(it) }
+
+    private fun deviceId(): String = syncPrefs.getString(KEY_DEVICE, null)
+        ?: java.util.UUID.randomUUID().toString().also { syncPrefs.edit().putString(KEY_DEVICE, it).apply() }
+
+    private fun deviceName(): String =
+        (try { Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME) } catch (e: Exception) { null })
+            ?.takeIf { it.isNotBlank() } ?: "${Build.MANUFACTURER} ${Build.MODEL}"
+
+    private fun sync() = SaveSync(File(filesDir, "saves"), cacheDir, deviceId(), deviceName())
+
+    private fun displayName(uri: Uri): String = try {
+        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
+            if (it.moveToFirst()) it.getString(0) else null
+        }
+    } catch (e: Exception) { null } ?: uri.lastPathSegment ?: "?"
+
+    private fun fmt(t: Long) = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(t))
+
+    private fun gameRunning(): Boolean {
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return am.runningAppProcesses?.any { it.processName.endsWith(":game") } == true
+    }
+
+    private fun chooseSyncFile() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.sync_choose_title)
+            .setItems(arrayOf(getString(R.string.sync_choose_new), getString(R.string.sync_choose_existing))) { _, i ->
+                val intent = if (i == 0)
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("application/zip").putExtra(Intent.EXTRA_TITLE, "skeldal-sync.zip")
+                else
+                    Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*")
+                        .putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                startActivityForResult(intent, if (i == 0) REQ_SYNC_NEW else REQ_SYNC_OPEN)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** Shows what is in the sync file: devices, newest save, what a sync would change. */
+    private fun syncStatus() {
+        val uri = syncUri()
+        syncRun.isEnabled = uri != null
+        if (uri == null) { syncInfo.text = getString(R.string.sync_not_set); return }
+        val name = displayName(uri)
+        syncInfo.text = getString(R.string.sync_loading, name)
+        Thread {
+            val text = try {
+                val s = sync()
+                val remote = s.readRemote { contentResolver.openInputStream(uri) }
+                val plan = s.plan(remote)
+                remote.dir?.deleteRecursively()
+                if (remote.isEmpty && remote.devices.isEmpty()) getString(R.string.sync_status_empty, name)
+                else {
+                    val me = deviceId()
+                    val devices = remote.devices.sortedByDescending { it.lastSync }.joinToString("\n") {
+                        getString(R.string.sync_device_line, it.name, if (it.id == me) getString(R.string.sync_this_device) else "",
+                            fmt(it.lastSync), it.saves)
+                    }.ifEmpty { getString(R.string.sync_no_devices) }
+                    getString(R.string.sync_status, name, remote.entries.size, fmt(remote.newest()), devices,
+                        plan.download.size, plan.upload.size, plan.unchanged)
+                }
+            } catch (e: ImportException) {
+                getString(R.string.sync_read_failed, name, e.message ?: "")
+            } catch (e: Exception) {
+                getString(R.string.sync_read_failed, name, e.javaClass.simpleName)
+            }
+            ui.post { if (!isFinishing) syncInfo.text = text }
+        }.start()
+    }
+
+    /** Reads the sync file, shows what will happen and synchronises after confirmation. */
+    private fun syncPrepare() {
+        val uri = syncUri() ?: return
+        if (gameRunning()) {
+            AlertDialog.Builder(this).setMessage(R.string.sync_game_running).setPositiveButton(android.R.string.ok, null).show()
+            return
+        }
+        setBusy(true)
+        Thread {
+            try {
+                val s = sync()
+                val remote = s.readRemote { contentResolver.openInputStream(uri) }
+                val plan = s.plan(remote)
+                ui.post {
+                    setBusy(false)
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.sync_run)
+                        .setMessage(getString(R.string.sync_confirm, plan.download.size, plan.upload.size, plan.unchanged))
+                        .setPositiveButton(R.string.sync_run) { _, _ ->
+                            background {
+                                if (plan.download.isNotEmpty()) manager.backupNow(version())
+                                val r = s.apply(remote, plan, {
+                                    // "wt" truncates; some cloud providers only know "w" (which replaces the file there)
+                                    (try { contentResolver.openOutputStream(uri, "wt") } catch (e: Exception) { null }
+                                        ?: contentResolver.openOutputStream(uri, "w"))
+                                        ?: throw ImportException("Do souboru nelze zapisovat.")
+                                })
+                                ui.post { syncStatus() }
+                                getString(R.string.sync_done, r.downloaded, r.uploaded, r.unchanged, r.total)
+                            }
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _, _ -> remote.dir?.deleteRecursively() }
+                        .show()
+                }
+            } catch (e: Exception) {
+                val msg = (e as? ImportException)?.message ?: (getString(R.string.saves_failed) + " (" + e.javaClass.simpleName + ")")
+                ui.post {
+                    setBusy(false)
+                    AlertDialog.Builder(this).setMessage(msg).setPositiveButton(android.R.string.ok, null).show()
+                }
+            }
+        }.start()
     }
 
     private fun chooseBackup() {
@@ -150,6 +294,10 @@ class SavesActivity : Activity() {
     companion object {
         private const val REQ_EXPORT = 1
         private const val REQ_IMPORT = 2
+        private const val REQ_SYNC_NEW = 3
+        private const val REQ_SYNC_OPEN = 4
+        private const val KEY_URI = "uri"
+        private const val KEY_DEVICE = "device_id"
 
         fun manager(a: Activity) = SaveGameManager(File(a.filesDir, "saves"), File(a.filesDir, "saves_backups"))
     }

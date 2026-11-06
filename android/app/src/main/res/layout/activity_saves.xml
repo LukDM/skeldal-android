@@ -48,6 +48,29 @@
             android:layout_marginTop="16dp"
             android:text="@string/saves_hint" />
 
+        <TextView
+            style="@style/SettingsSection"
+            android:text="@string/sync_title" />
+
+        <TextView
+            android:id="@+id/sync_info"
+            style="@style/SettingsLabel" />
+
+        <Button
+            android:id="@+id/btn_sync_run"
+            style="@style/LauncherButton"
+            android:layout_marginTop="8dp"
+            android:text="@string/sync_run" />
+
+        <Button
+            android:id="@+id/btn_sync_choose"
+            style="@style/LauncherButton"
+            android:text="@string/sync_choose" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/sync_hint" />
+
         <Button
             android:id="@+id/btn_saves_close"
             style="@style/LauncherButton"

@@ -16,4 +16,36 @@
     <string name="saves_restore_do">Obnovit</string>
     <string name="saves_restored">Obnoveno pozic: %1$d.</string>
     <string name="saves_failed">Operace se nezdařila.</string>
+    <string name="sync_title">Synchronizace mezi zařízeními</string>
+    <string name="sync_run">Synchronizovat</string>
+    <string name="sync_choose">Nastavit synchronizační soubor</string>
+    <string name="sync_not_set">Synchronizační soubor zatím není nastavený.</string>
+    <string name="sync_loading">Soubor: %1$s
+Načítám stav…</string>
+    <string name="sync_status">Soubor: %1$s
+V souboru: %2$d pozic, nejnovější %3$s
+
+%4$s
+
+Ke stažení: %5$d · k odeslání: %6$d · stejných: %7$d</string>
+    <string name="sync_status_empty">Soubor: %1$s
+Soubor je zatím prázdný – první synchronizace do něj nahraje pozice z tohoto zařízení.</string>
+    <string name="sync_device_line">%1$s%2$s – naposledy %3$s (%4$d pozic)</string>
+    <string name="sync_this_device">"  (toto zařízení)"</string>
+    <string name="sync_no_devices">Ze žádného zařízení se zatím nesynchronizovalo.</string>
+    <string name="sync_read_failed">Soubor: %1$s
+Stav se nepodařilo načíst: %2$s</string>
+    <string name="sync_choose_title">Synchronizační soubor</string>
+    <string name="sync_choose_new">Vytvořit nový (první zařízení)</string>
+    <string name="sync_choose_existing">Vybrat existující (další zařízení)</string>
+    <string name="sync_confirm">Stáhnout do tohoto zařízení: %1$d
+Odeslat do souboru: %2$d
+Beze změny: %3$d
+
+Vyhrává vždy novější verze pozice, nic se nemaže. Před stažením se současné pozice zazálohují.</string>
+    <string name="sync_done">Synchronizováno.
+Staženo: %1$d · odesláno: %2$d · beze změny: %3$d
+Celkem pozic v souboru: %4$d</string>
+    <string name="sync_game_running">Hra právě běží. Ukončete ji, a pak synchronizujte.</string>
+    <string name="sync_hint">Na prvním zařízení vytvořte synchronizační soubor, nejlépe na Google Disku (nebo OneDrive, Dropboxu…). Na dalších zařízeních vyberte stejný soubor. Pak stačí před hraním a po něm klepnout na Synchronizovat: z každé pozice se ponechá novější verze a nic se nemaže.</string>
 </resources>

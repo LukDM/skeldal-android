@@ -122,6 +122,9 @@ class SaveGameManager(private val savesDir: File, private val backupDir: File) {
         }
     }
 
+    /** Backs up the current saves (e.g. before a synchronisation). Returns null when there are none. */
+    fun backupNow(appVersion: String): File? = backupCurrent(appVersion)
+
     private fun backupCurrent(appVersion: String): File? {
         val files = saveFiles(savesDir)
         if (files.isEmpty()) return null
