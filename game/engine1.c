@@ -1234,6 +1234,17 @@ void set_lclip_rclip(int celx,int cely,int lc,int rc)
   }
 
 
+/// Bottom of the lives number above an enemy; tall monsters would put it above the view
+/// (and the health bar above it would not be drawn at all), so it is kept inside the view.
+static int enemy_label_y(int y, const DRW_ENEMY *drw) {
+    int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6;
+    char num = show_lives || ((cfg_show_lives & 1) && drw->show_cfg_lives);
+    char bar = (cfg_show_lives & 2) && drw->show_cfg_lives;
+    int min_y = SCREEN_OFFLINE + 2 + (num ? 10 : 0) + (bar ? (num ? 14 : 7) : 0);
+    if (!num && bar) min_y = SCREEN_OFFLINE + 2 + 7;
+    return ly < min_y ? min_y : ly;
+}
+
 void draw_enemy(DRW_ENEMY *drw)
   {
   int x,y,lx,sd;
@@ -1302,7 +1313,7 @@ void draw_enemy(DRW_ENEMY *drw)
         enum { SEGS = 10, SEG_W = 3, SEG_H = 3 };
         int bw = SEGS * (SEG_W + 1) - 1 + 4;        // segments + gaps + frame and padding
         int bh = SEG_H + 4;
-        int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6 - ((show_lives || (cfg_show_lives & 1)) ? 14 : 0);
+        int ly = enemy_label_y(y, drw) - ((show_lives || (cfg_show_lives & 1)) ? 14 : 0);
         int bx = lx - bw / 2;
         int top = ly - bh;
         if (bx > 0 && bx + bw < 639 && top > SCREEN_OFFLINE && drw->maxnum > 0) {
@@ -1336,7 +1347,7 @@ void draw_enemy(DRW_ENEMY *drw)
     if (show_lives || ((cfg_show_lives & 1) && drw->show_cfg_lives)) {
         char s[25];
 
-        int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6;
+        int ly = enemy_label_y(y, drw);
         RedirectScreenBufferSecond();
         sprintf(s, "%d", drw->num);
         sd = text_width(s) / 2;

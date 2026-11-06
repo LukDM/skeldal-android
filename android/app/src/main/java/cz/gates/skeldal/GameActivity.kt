@@ -151,6 +151,16 @@ class GameActivity : SDLActivity() {
 
     // Automatic mode: hide the touch controls when a physical gamepad or keyboard is used.
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // Soft keyboards send digits as key events; SDL turns them into text with the key character
+        // map of the system keyboard layout, which on a Czech layout gives "+ěšč…" for 1 2 3 4 and
+        // the digits for "!@#$". Digits from a virtual keyboard therefore go straight to the game.
+        if (isSoftKeyboard(event)) {
+            val ch = softDigit(event)
+            if (ch != 0) {
+                if (event.action == KeyEvent.ACTION_DOWN) NativeBridge.nativeInjectKey(ch)
+                return true
+            }
+        }
         val physical = isPhysicalInput(event.device, event.source)
         if (physical) hideForHardwareInput()
         // extra buttons (M1, M2, ...) go to the engine as controller buttons 23..31
@@ -179,6 +189,21 @@ class GameActivity : SDLActivity() {
 
     private fun hideForHardwareInput() {
         if (touchMode == GameSettings.TouchMode.AUTO) overlay?.controlsVisible = false
+    }
+
+    private fun isSoftKeyboard(e: KeyEvent): Boolean =
+        e.deviceId == android.view.KeyCharacterMap.VIRTUAL_KEYBOARD || e.device?.isVirtual == true
+
+    /** BIOS code of a digit / shifted digit symbol (US layout like the game), 0 = not such a key. */
+    private fun softDigit(e: KeyEvent): Int {
+        val k = e.keyCode
+        val digit = when (k) {
+            in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 -> k - KeyEvent.KEYCODE_0
+            in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_9 -> return '0'.code + (k - KeyEvent.KEYCODE_NUMPAD_0)
+            else -> return 0
+        }
+        if (!e.isShiftPressed) return '0'.code + digit
+        return ")!@#$%^&*("[digit].code
     }
 
     private fun isPhysicalInput(device: InputDevice?, source: Int): Boolean {
