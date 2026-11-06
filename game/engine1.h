@@ -115,6 +115,8 @@ extern t_points viewport_geometry;
 extern word *buffer_2nd;
 extern char show_names;
 extern char show_lives;
+/// [game] show_enemy_lives: always show the lives of enemies (like the spell), not saved in games
+extern char cfg_show_lives;
 extern char secnd_shade;
 extern char show_mob_info;
 

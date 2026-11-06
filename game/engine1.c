@@ -106,6 +106,7 @@ void lodka64b(void *source,void *target,void *background,void *xlat,int32_t xysi
 //word *GetBuffer2nd();
 //word *background;
 char nofloors=0,show_names=0,show_lives=0;
+char cfg_show_lives=0;
 
 
 /*void zooming1(void *source,int32_t target,word *background,void *xlat,int32_t xysize)
@@ -1294,7 +1295,7 @@ void draw_enemy(DRW_ENEMY *drw)
                     last_scale, y + 1, (clipr << 16) + clipl);
         }
     }
-    if (show_lives) {
+    if (show_lives || cfg_show_lives) {
         char s[25];
 
         int ly = y + SCREEN_OFFLINE - last_scale * 5 / 6;

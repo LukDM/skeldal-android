@@ -1759,6 +1759,8 @@ int skeldal_entry_point(const SKELDAL_CONFIG *start_cfg)
       // [game] always_minimap = show the small map (normally only in battle) also while exploring
       const INI_CONFIG_SECTION *gsec = ini_section_open(cfg, "game");
       if (ini_get_boolean(gsec, "always_minimap", 0) == 1) game_extras |= EX_ALWAYS_MINIMAP;
+      // [game] show_enemy_lives = numbers with remaining lives above enemies
+      if (ini_get_boolean(gsec, "show_enemy_lives", 0) == 1) cfg_show_lives = 1;
   }
   if (!change_current_directory(groot)) {
       start_cfg->show_error(concat2("Can't change directory to: ", groot));

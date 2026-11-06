@@ -31,6 +31,7 @@ object GameConfigWriter {
         append('\n')
         append("[game]\n")
         append("always_minimap=").append(onOff(settings.alwaysMinimap)).append('\n')
+        append("show_enemy_lives=").append(onOff(settings.showEnemyLives)).append('\n')
         append('\n')
         append("[controller]\n")
         append("enabled=").append(onOff(settings.controllerEnabled)).append('\n')

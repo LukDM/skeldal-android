@@ -80,6 +80,11 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_always_minimap" />
 
+        <Switch
+            android:id="@+id/switch_enemy_lives"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_enemy_lives" />
+
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_crt" />

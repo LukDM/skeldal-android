@@ -29,6 +29,7 @@ class SettingsActivity : Activity() {
     private lateinit var videoLines: Switch
     private lateinit var portrait: Switch
     private lateinit var minimap: Switch
+    private lateinit var enemyLives: Switch
     private lateinit var size: SeekBar
     private lateinit var picture: SeekBar
     private lateinit var pictureLabel: TextView
@@ -71,6 +72,7 @@ class SettingsActivity : Activity() {
         videoLines = findViewById(R.id.switch_video_scanlines)
         portrait = findViewById(R.id.switch_allow_portrait)
         minimap = findViewById(R.id.switch_always_minimap)
+        enemyLives = findViewById(R.id.switch_enemy_lives)
         size = findViewById(R.id.seek_touch_size)
         picture = findViewById(R.id.seek_picture_scale)
         pictureLabel = findViewById(R.id.label_picture_scale)
@@ -135,7 +137,7 @@ class SettingsActivity : Activity() {
 
         val select = SimpleSelect { save() }
         for (sp in listOf(scaling, crt, touchMode, language)) sp.onItemSelectedListener = select
-        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
+        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, enemyLives, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
                           ctrlEnabled, swapSticks, autosaveBg) + optionalSwitches.values) {
             sw.setOnCheckedChangeListener { _, _ -> save() }
         }
@@ -192,6 +194,7 @@ class SettingsActivity : Activity() {
         videoLines.isChecked = s.videoScanlines
         portrait.isChecked = s.allowPortrait
         minimap.isChecked = s.alwaysMinimap
+        enemyLives.isChecked = s.showEnemyLives
         size.progress = s.touchSize - 50
         picture.progress = s.pictureScale - 50
         opacity.progress = s.touchOpacity - 10
@@ -221,6 +224,7 @@ class SettingsActivity : Activity() {
                 videoScanlines = videoLines.isChecked,
                 allowPortrait = portrait.isChecked,
                 alwaysMinimap = minimap.isChecked,
+                showEnemyLives = enemyLives.isChecked,
                 pictureScale = pictureValue(),
                 touchMode = touchModeValues[touchMode.selectedItemPosition.coerceIn(touchModeValues.indices)],
                 touchSize = sizeValue(),
