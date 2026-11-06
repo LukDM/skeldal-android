@@ -1,5 +1,7 @@
 # Brány Skeldalu – Android
 
+Přehled ovládání (dotyk, gamepad, klávesnice): [OVLADANI.md](OVLADANI.md).
+
 Android port je další platforma existujícího enginu (ne nový engine). Herní logika, renderer
 (SDL2), zvuk, mapy i uložené pozice jsou společné s PC verzí; Android část tvoří launcher
 v Kotlinu, malý JNI most a platformní vrstva `platform/android/`.

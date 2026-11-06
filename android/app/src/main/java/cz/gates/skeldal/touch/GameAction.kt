@@ -29,13 +29,18 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
     OVERLAY_MAP(43, "MAPA+", false), // KEYCODE_O: transparent map over the view (game mod)
     CONSOLE(68, "KONZOLE", false),  // KEYCODE_GRAVE: developer console with cheats (game mod)
     KEYBOARD(-1, "⌨", false),      // not a key: shows / hides the soft keyboard
+    CTRL(113, "CTRL", false),       // KEYCODE_CTRL_LEFT, latched: tap = held until tapped again (Ctrl + tap on a portrait = split the group)
+    MERGE(124, "SLOUČIT", false),   // KEYCODE_INSERT: merge all characters standing on one square
     ;
+
+    /** Latched buttons stay pressed after a tap until they are tapped again. */
+    val latched: Boolean get() = this == CTRL
 
     companion object {
         /** Buttons shown by default, in this order. */
         val DEFAULT_BUTTONS = listOf(MENU, MAP, ACTION, BATTLE)
         /** Buttons the user can add in the settings. */
-        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, OVERLAY_MAP, CONSOLE)
+        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, CTRL, MERGE, OVERLAY_MAP, CONSOLE)
     }
 }
 

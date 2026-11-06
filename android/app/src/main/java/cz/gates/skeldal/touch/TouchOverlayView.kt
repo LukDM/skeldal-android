@@ -61,6 +61,7 @@ class TouchOverlayView(
     )
     private var controls: List<TouchLayout.Control> = emptyList()
     private val pressed = HashMap<Int, TouchLayout.Control>()   // pointer id -> control
+    private val latchedDown = HashSet<GameAction>()              // latched buttons currently held
     private val alpha = (opacityPercent.coerceIn(10, 100) * 255 / 100)
 
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(40, 32, 24) }
@@ -95,7 +96,7 @@ class TouchOverlayView(
         }
         if (!controlsVisible) return
         for (c in controls) {
-            val p = if (pressed.containsValue(c)) fillPressed else fill
+            val p = if (pressed.containsValue(c) || c.action in latchedDown) fillPressed else fill
             p.alpha = alpha
             stroke.alpha = alpha
             text.alpha = (alpha + 255) / 2
@@ -157,6 +158,9 @@ class TouchOverlayView(
     /** Releases held keys and an unfinished gesture (activity paused, focus lost). */
     fun releaseInput() {
         releaseAll()
+        for (a in latchedDown) sink.keyUp(a.keyCode)
+        latchedDown.clear()
+        invalidate()
         gestures.onCancel()
     }
 
@@ -169,6 +173,9 @@ class TouchOverlayView(
         pressed[id] = c
         if (c.action == GameAction.KEYBOARD) {
             onKeyboardToggle?.invoke()
+        } else if (c.action.latched) {
+            if (latchedDown.remove(c.action)) sink.keyUp(c.action.keyCode)
+            else { latchedDown.add(c.action); sink.keyDown(c.action.keyCode) }
         } else if (c.action.repeats) {
             tapKey(c.action)
             handler.postDelayed(repeater(id, c), REPEAT_DELAY_MS)
@@ -181,7 +188,7 @@ class TouchOverlayView(
 
     private fun release(id: Int) {
         val c = pressed.remove(id) ?: return
-        if (!c.action.repeats && c.action.keyCode >= 0) sink.keyUp(c.action.keyCode)
+        if (!c.action.repeats && !c.action.latched && c.action.keyCode >= 0) sink.keyUp(c.action.keyCode)
         invalidate()
     }
 

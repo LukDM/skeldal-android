@@ -119,6 +119,8 @@ class SettingsActivity : Activity() {
             cz.gates.skeldal.touch.GameAction.REST to "SPÁT (F4 – odpočinek)",
             cz.gates.skeldal.touch.GameAction.SETTINGS to "NASTAV. (F1 – nastavení hry)",
             cz.gates.skeldal.touch.GameAction.KEYBOARD to "⌨ (klávesnice kdykoli – zapnout / vypnout)",
+            cz.gates.skeldal.touch.GameAction.CTRL to "CTRL (zamykací – s klepnutím na portrét rozdělí skupinu)",
+            cz.gates.skeldal.touch.GameAction.MERGE to "SLOUČIT (Insert – spojí postavy na jednom políčku)",
             cz.gates.skeldal.touch.GameAction.OVERLAY_MAP to "MAPA+ (O – průhledná mapa přes obraz)",
             cz.gates.skeldal.touch.GameAction.CONSOLE to "KONZOLE (` – konzole s cheaty)",
         )
