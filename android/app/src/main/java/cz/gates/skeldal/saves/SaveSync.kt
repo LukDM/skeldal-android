@@ -116,6 +116,19 @@ class SaveSync(
         return Plan(down, up, same)
     }
 
+    /** Only copies the newer remote saves into the saves folder; the sync file is not changed. */
+    fun downloadOnly(remote: Remote, plan: Plan): Int {
+        val dir = remote.dir ?: throw IllegalStateException("remote not extracted")
+        savesDir.mkdirs()
+        for (e in plan.download) {
+            val dest = File(savesDir, e.name)
+            File(dir, e.name).copyTo(dest, overwrite = true)
+            dest.setLastModified(e.mtime)
+        }
+        dir.deleteRecursively()
+        return plan.download.size
+    }
+
     /**
      * Copies the newer remote saves into the saves folder and writes the merged state into [out].
      * [out] is only opened after everything was read, so an error leaves the sync file untouched.

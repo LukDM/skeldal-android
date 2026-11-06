@@ -207,20 +207,43 @@ class SavesActivity : Activity() {
                 val plan = s.plan(remote)
                 ui.post {
                     setBusy(false)
+                    if (!plan.hasChanges) {
+                        remote.dir?.deleteRecursively()
+                        AlertDialog.Builder(this).setMessage(R.string.sync_nothing).setPositiveButton(android.R.string.ok, null).show()
+                        return@post
+                    }
+                    val down = plan.download.size
+                    val up = plan.upload.size
+                    val options = ArrayList<Pair<String, () -> String>>()
+                    val write = { p: SaveSync.Plan ->
+                        s.apply(remote, p, {
+                            // "wt" truncates; some cloud providers only know "w" (which replaces the file there)
+                            (try { contentResolver.openOutputStream(uri, "wt") } catch (e: Exception) { null }
+                                ?: contentResolver.openOutputStream(uri, "w"))
+                                ?: throw ImportException("Do souboru nelze zapisovat.")
+                        })
+                    }
+                    if (down > 0) options.add(getString(R.string.sync_opt_download, down) to {
+                        manager.backupNow(version())
+                        val n = s.downloadOnly(remote, plan)
+                        getString(R.string.sync_done_download, n)
+                    })
+                    if (up > 0) options.add(getString(R.string.sync_opt_upload, up) to {
+                        val r = write(plan.copy(download = emptyList()))
+                        getString(R.string.sync_done_upload, r.uploaded)
+                    })
+                    if (down > 0 && up > 0) options.add(getString(R.string.sync_opt_both, down, up) to {
+                        manager.backupNow(version())
+                        val r = write(plan)
+                        getString(R.string.sync_done_both, r.downloaded, r.uploaded, r.total)
+                    })
                     AlertDialog.Builder(this)
-                        .setTitle(R.string.sync_run)
-                        .setMessage(getString(R.string.sync_confirm, plan.download.size, plan.upload.size, plan.unchanged))
-                        .setPositiveButton(R.string.sync_run) { _, _ ->
+                        .setTitle(R.string.sync_dialog_title)
+                        .setItems(options.map { it.first }.toTypedArray()) { _, k ->
                             background {
-                                if (plan.download.isNotEmpty()) manager.backupNow(version())
-                                val r = s.apply(remote, plan, {
-                                    // "wt" truncates; some cloud providers only know "w" (which replaces the file there)
-                                    (try { contentResolver.openOutputStream(uri, "wt") } catch (e: Exception) { null }
-                                        ?: contentResolver.openOutputStream(uri, "w"))
-                                        ?: throw ImportException("Do souboru nelze zapisovat.")
-                                })
+                                val msg = options[k].second()
                                 ui.post { syncStatus() }
-                                getString(R.string.sync_done, r.downloaded, r.uploaded, r.unchanged, r.total)
+                                msg
                             }
                         }
                         .setNegativeButton(android.R.string.cancel) { _, _ -> remote.dir?.deleteRecursively() }

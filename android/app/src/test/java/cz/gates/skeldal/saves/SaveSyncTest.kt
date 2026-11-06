@@ -93,4 +93,21 @@ class SaveSyncTest {
         val remote = b.readRemote { out.toByteArray().inputStream() }
         assertEquals(1, b.plan(remote).download.size)
     }
+
+    @Test
+    fun downloadOnlyLeavesTheSyncFileAndUploadsNothing() {
+        val (dirA, a) = device("A")
+        val (dirB, b) = device("B")
+        save(dirA, "sav.00000003.0001", "from A", 1_000_000)
+        val (shared, _) = syncOnce(a, null, 2_000_000)
+        save(dirB, "sav.00000003.only-b", "b", 3_000_000)
+        val remote = b.readRemote { shared.inputStream() }
+        val plan = b.plan(remote)
+        assertEquals(1, plan.download.size)
+        assertEquals(1, plan.upload.size)
+        assertEquals(1, b.downloadOnly(remote, plan))
+        assertEquals("from A", File(dirB, "sav.00000003.0001").readText())
+        // the shared file still has only A's save
+        assertEquals(setOf("sav.00000003.0001"), a.readRemote { shared.inputStream() }.entries.keys)
+    }
 }
