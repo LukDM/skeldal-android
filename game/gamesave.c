@@ -1400,6 +1400,60 @@ static int bright_slot(int yr)
   return id;
   }
 
+/* Touch / mouse drag over the list of saved games scrolls it (the list shows SLOTS_MAX rows,
+   before only the arrow keys could scroll it). Because a press may start a drag, a slot is now
+   activated on release.
+   returns 0 = not handled (hover / press), 1 = consumed by dragging, 2 = click (released without drag) */
+static int slot_drag_start_y = -1;
+static int slot_drag_top = 0;
+static char slot_dragging = 0;
+
+static int slot_list_touch(int yr)
+  {
+  unsigned int t = ms_last_event.event_type;
+  if (t & 0x2)
+     {
+     slot_drag_start_y = yr;
+     slot_drag_top = current_slot_list_top_line;
+     slot_dragging = 0;
+     return 0;
+     }
+  if ((t & 0x4) || ((t & 0x1) && !ms_last_event.tl1 && slot_drag_start_y >= 0))
+     {
+     int started = slot_drag_start_y >= 0;
+     int was = slot_dragging;
+     slot_drag_start_y = -1;
+     slot_dragging = 0;
+     if (!(t & 0x4)) return 0;     /* button released outside of the list */
+     return started && !was ? 2 : 1;
+     }
+  if ((t & 0x1) && ms_last_event.tl1 && slot_drag_start_y >= 0)
+     {
+     int dy = slot_drag_start_y - yr;
+     if (!slot_dragging && (dy > 10 || dy < -10)) slot_dragging = 1;
+     if (slot_dragging)
+        {
+        int rows = (int)current_game_slot_list.count + (force_save ? 1 : 0);
+        int max_top = rows - SLOTS_MAX;
+        int top = slot_drag_top + dy / SLOT_SPACE;
+        if (max_top < 0) max_top = 0;
+        if (top > max_top) top = max_top;
+        if (top < 0) top = 0;
+        if (top != current_slot_list_top_line)
+           {
+           current_slot_list_top_line = top;
+           last_select = -1;
+           schovej_mysku();
+           if (force_save) redraw_save(); else redraw_load();
+           showview(0,0,0,0);
+           ukaz_mysku();
+           }
+        return 1;
+        }
+     }
+  return 0;
+  }
+
 char updown_scroll(int id,int xa,int ya,int xr,int yr);
 
 static char updown_noinst=0;
@@ -1482,7 +1536,7 @@ T_CLK_MAP clk_load_error[]=
   {
   {-1,59,14+SCREEN_OFFLINE,306,46+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {1,59,310+SCREEN_OFFLINE,306,332+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
-  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc,3,H_MS_DEFAULT},
+  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc,7,H_MS_DEFAULT},
   {-1,30,0,85,14,clk_load_konec,2,H_MS_DEFAULT},
   {-1,0,0,639,479,empty_clk,0xff,H_MS_DEFAULT},
   };
@@ -1492,9 +1546,11 @@ T_CLK_MAP clk_load_error[]=
 
 static char clk_load_proc_menu(int id,int xa,int ya,int xr,int yr)
   {
+  int touch=slot_list_touch(yr-18);
+  if (touch==1) return 1;
   id=bright_slot(yr-18);
   xa;ya;xr;yr;
-  if (ms_last_event.event_type & 0x2 && id>=0 && (size_t)id < current_game_slot_list.count) {
+  if (touch==2 && id>=0 && (size_t)id < current_game_slot_list.count) {
      send_message(E_CLOSE_MAP,current_game_slot_list.files[id]);
   }
   return 1;
@@ -1505,7 +1561,7 @@ T_CLK_MAP clk_load_menu[]=
   {
   {-1,59,14+SCREEN_OFFLINE,306,46+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {1,59,310+SCREEN_OFFLINE,306,332+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
-  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc_menu,3,H_MS_DEFAULT},
+  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc_menu,7,H_MS_DEFAULT},
   {-1,0,0,639,479,clk_load_konec,8,H_MS_DEFAULT},
   {-1,0,0,639,479,empty_clk,0xff,H_MS_DEFAULT},
   };
@@ -1541,9 +1597,11 @@ build_all_players();
 
 static char clk_load_proc(int id,int xa,int ya,int xr,int yr)
   {
+  int touch=slot_list_touch(yr-18);
+  if (touch==1) return 1;
   id=bright_slot(yr-18);
   xa;ya;xr;yr;
-  if (ms_last_event.event_type & 0x2 && id>=0 && (size_t)id < current_game_slot_list.count)
+  if (touch==2 && id>=0 && (size_t)id < current_game_slot_list.count)
      {
       load_save_pos_ingame(id);
      }
@@ -1639,7 +1697,7 @@ static void save_as_dialog(int pos);
 #define CLK_SAVELOAD 11
 T_CLK_MAP clk_load[]=
   {
-  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc,3,H_MS_DEFAULT},
+  {-1,LOAD_SLOT_S,SCREEN_OFFLINE,LOAD_SLOT_E,350,clk_load_proc,7,H_MS_DEFAULT},
   {-1,59,14+SCREEN_OFFLINE,306,46+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {1,59,310+SCREEN_OFFLINE,306,332+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {-1,54,378,497,479,start_invetory,2+8,-1},
@@ -1656,9 +1714,11 @@ T_CLK_MAP clk_load[]=
 
 static char clk_save_proc(int id,int xa,int ya,int xr,int yr)
   {
+  int touch=slot_list_touch(yr-18);
+  if (touch==1) return 1;
   id=bright_slot(yr-18);
   xa;ya;xr;yr;
-  if (ms_last_event.event_type & 0x2 && id>=0)
+  if (touch==2 && id>=0)
      {
       save_as_dialog(id);
      }
@@ -1668,7 +1728,7 @@ static char clk_save_proc(int id,int xa,int ya,int xr,int yr)
 
 T_CLK_MAP clk_save[]=
   {
-  {-1,SAVE_SLOT_S,SCREEN_OFFLINE,SAVE_SLOT_E,350,clk_save_proc,3,H_MS_DEFAULT},
+  {-1,SAVE_SLOT_S,SCREEN_OFFLINE,SAVE_SLOT_E,350,clk_save_proc,7,H_MS_DEFAULT},
   {-1,59+274,14+SCREEN_OFFLINE,306+274,46+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {1,59+274,310+SCREEN_OFFLINE,306+274,332+SCREEN_OFFLINE,updown_scroll,2,H_MS_ZARE},
   {-1,54,378,497,479,start_invetory,2+8,-1},
