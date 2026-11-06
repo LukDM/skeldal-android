@@ -84,7 +84,8 @@ class SaveListActivity : Activity() {
     private fun row(s: SaveInfo): TextView {
         val title = s.name.ifBlank { getString(R.string.savelist_noname) } +
             if (s.autosave) "  " + getString(R.string.savelist_autosave) else ""
-        val detail = getString(R.string.savelist_detail, s.gameTimeText(), fmt(s.savedAt))
+        // (the time in the file name is the game's internal clock, not what the game shows - not displayed)
+        val detail = getString(R.string.savelist_detail, fmt(s.savedAt))
         return TextView(this).apply {
             text = "$title\n$detail"
             textSize = 15f

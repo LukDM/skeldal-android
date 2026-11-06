@@ -20,7 +20,7 @@
     <string name="savelist_title">Správce pozic</string>
     <string name="savelist_hint">Klepnutím na pozici ji přejmenujete, exportujete nebo smažete. Klepnutím na kampaň exportujete nebo smažete celou kampaň.</string>
     <string name="savelist_campaign">Kampaň zahájená %1$s · %2$d pozic</string>
-    <string name="savelist_detail">Herní čas %1$s · uloženo %2$s</string>
+    <string name="savelist_detail">Uloženo %1$s</string>
     <string name="savelist_autosave">(automatická)</string>
     <string name="savelist_noname">(bez názvu)</string>
     <string name="savelist_rename">Přejmenovat</string>
