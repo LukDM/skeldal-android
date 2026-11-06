@@ -28,9 +28,14 @@
             android:visibility="gone" />
 
         <Button
-            android:id="@+id/btn_saves_export"
+            android:id="@+id/btn_saves_list"
             style="@style/LauncherButton"
             android:layout_marginTop="16dp"
+            android:text="@string/savelist_open" />
+
+        <Button
+            android:id="@+id/btn_saves_export"
+            style="@style/LauncherButton"
             android:text="@string/saves_export" />
 
         <Button

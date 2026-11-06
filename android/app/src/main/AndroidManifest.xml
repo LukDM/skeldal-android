@@ -35,6 +35,11 @@
             android:label="@string/mapping_title" />
 
         <activity
+            android:name=".saves.SaveListActivity"
+            android:exported="false"
+            android:label="@string/savelist_title" />
+
+        <activity
             android:name=".saves.SavesActivity"
             android:exported="false"
             android:label="@string/saves_title" />

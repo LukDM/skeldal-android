@@ -47,11 +47,13 @@ class SavesActivity : Activity() {
         val restore = findViewById<Button>(R.id.btn_saves_restore)
         val close = findViewById<Button>(R.id.btn_saves_close)
         val delete = findViewById<Button>(R.id.btn_saves_delete)
+        val listBtn = findViewById<Button>(R.id.btn_saves_list)
+        listBtn.setOnClickListener { startActivity(Intent(this, SaveListActivity::class.java)) }
         delete.setOnClickListener { confirmDelete() }
         syncInfo = findViewById(R.id.sync_info)
         syncRun = findViewById(R.id.btn_sync_run)
         val syncChoose = findViewById<Button>(R.id.btn_sync_choose)
-        buttons = listOf(export, import, restore, delete, close, syncRun, syncChoose)
+        buttons = listOf(listBtn, export, import, restore, delete, close, syncRun, syncChoose)
         syncRun.setOnClickListener { syncPrepare() }
         syncChoose.setOnClickListener { chooseSyncFile() }
 
@@ -72,7 +74,7 @@ class SavesActivity : Activity() {
         }
         restore.setOnClickListener { chooseBackup() }
         close.setOnClickListener { finish() }
-        export.requestFocus()
+        listBtn.requestFocus()
     }
 
     override fun onResume() {
@@ -89,6 +91,7 @@ class SavesActivity : Activity() {
         findViewById<Button>(R.id.btn_saves_export).isEnabled = s.count > 0
         findViewById<Button>(R.id.btn_saves_restore).isEnabled = manager.backups().isNotEmpty()
         findViewById<Button>(R.id.btn_saves_delete).isEnabled = s.count > 0
+        findViewById<Button>(R.id.btn_saves_list).isEnabled = s.count > 0
     }
 
     private fun confirmDelete() {

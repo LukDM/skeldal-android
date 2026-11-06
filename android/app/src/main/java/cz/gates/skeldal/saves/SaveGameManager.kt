@@ -131,6 +131,12 @@ class SaveGameManager(private val savesDir: File, private val backupDir: File) {
         }
     }
 
+    /** Writes the given savegames into [out] (a ZIP). */
+    fun exportFiles(files: List<File>, out: OutputStream, appVersion: String) {
+        if (files.isEmpty()) throw ImportException("Nejsou vybrané žádné pozice.")
+        zipFiles(files, out, appVersion)
+    }
+
     /** Backs up the current saves (e.g. before a synchronisation). Returns null when there are none. */
     fun backupNow(appVersion: String): File? = backupCurrent(appVersion)
 
