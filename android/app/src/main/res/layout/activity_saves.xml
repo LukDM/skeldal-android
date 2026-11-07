@@ -77,6 +77,15 @@
             style="@style/LauncherButton"
             android:text="@string/sync_choose" />
 
+        <Switch
+            android:id="@+id/switch_sync_auto"
+            style="@style/SettingsSwitch"
+            android:text="@string/sync_auto" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/sync_auto_hint" />
+
         <TextView
             style="@style/SettingsHint"
             android:text="@string/sync_hint" />

@@ -24,6 +24,7 @@ import cz.gates.skeldal.install.ImportSource
 import cz.gates.skeldal.install.InstallationRepository
 import cz.gates.skeldal.install.SafTreeSource
 import cz.gates.skeldal.install.ZipFileSource
+import cz.gates.skeldal.saves.SyncConfig
 import cz.gates.skeldal.settings.GameConfigWriter
 import cz.gates.skeldal.settings.SettingsActivity
 import cz.gates.skeldal.settings.SettingsStore
@@ -79,6 +80,9 @@ class MainActivity : Activity() {
         super.onResume()
         refreshState()
         if (busyState == null) reportLastRun()
+        autoUploadAttempts = 0
+        ui.removeCallbacks(autoUploadCheck)
+        ui.post(autoUploadCheck)
         // gamepad / D-pad navigation starts on the most useful button
         (if (btnStart.isEnabled) btnStart else btnImportFolder).requestFocus()
     }
@@ -148,7 +152,44 @@ class MainActivity : Activity() {
             message(getString(R.string.error_config))
             return
         }
+        val sync = SyncConfig(this)
+        if (sync.autoUpload && sync.uri != null) sync.uploadPending = true
         startActivity(Intent(this, GameActivity::class.java))
+    }
+
+    // ---- automatic upload of the saves after the game (SyncConfig.autoUpload) --------------
+
+    private var autoUploadAttempts = 0
+    private var autoUploadRunning = false
+
+    /** Waits until the game process has ended (it may take a moment after returning), then uploads. */
+    private val autoUploadCheck: Runnable = object : Runnable {
+        override fun run() {
+            val sync = SyncConfig(this@MainActivity)
+            if (!sync.uploadPending || autoUploadRunning || isFinishing) return
+            if (!sync.autoUpload || sync.uri == null) { sync.uploadPending = false; return }
+            if (gameProcessAlive()) {
+                // the game is still running (e.g. only switched to the launcher): try again a bit later
+                if (++autoUploadAttempts < 10) ui.postDelayed(this, 1000)
+                return
+            }
+            autoUploadRunning = true
+            val app = applicationContext
+            Thread {
+                val msg = try {
+                    val n = sync.uploadNow()
+                    sync.uploadPending = false
+                    if (n > 0) getString(R.string.sync_auto_done, n) else null
+                } catch (e: Exception) {
+                    // stays pending: the next start of the launcher tries again
+                    getString(R.string.sync_auto_failed, (e as? ImportException)?.message ?: e.javaClass.simpleName)
+                }
+                ui.post {
+                    autoUploadRunning = false
+                    if (msg != null) Toast.makeText(app, msg, Toast.LENGTH_LONG).show()
+                }
+            }.start()
+        }
     }
 
     // ---- import --------------------------------------------------------------------------

@@ -237,6 +237,7 @@ void psani_poznamek_event(EVENT_MSG *msg,void **data)
         position(x,y);outtext(text);outtext("_");
         showview(0,0,640,480);
         }
+     game_text_input(1);   // soft keyboard on mobile
      }
   else
   if (msg->msg==E_MOUSE)
@@ -245,6 +246,9 @@ void psani_poznamek_event(EVENT_MSG *msg,void **data)
 
      ms=get_mouse(msg);
      if (ms->event_type & 0x8) send_message(E_KEYBOARD,27);
+     // left click / tap outside the note while typing: finish the note (like Enter); the original
+     // swallowed the click, so the map looked frozen until Enter or Esc was pressed
+     else if (ms->event_type & 0x2) send_message(E_KEYBOARD,13);
      msg->msg=-1;
      }
   else if (msg->msg==E_KEYBOARD)
@@ -279,6 +283,7 @@ void psani_poznamek_event(EVENT_MSG *msg,void **data)
      }
   else if (msg->msg==E_DONE)
      {
+     game_text_input(0);
      if (save_pic!=NULL)
         {
         put_picture(0,y,save_pic);

@@ -62,7 +62,16 @@ V Nastavení → Rozmístění tlačítek:
 ### Psaní textu
 
 Klávesnice se otevře sama u každého textového pole (jméno postavy, název pozice, smlouvání,
-konzole). Když ji zavřeš, objeví se nahoře uprostřed tlačítko **⌨ Klávesnice**, které ji vrátí.
+poznámka v mapě, konzole). Když ji zavřeš, objeví se nahoře uprostřed tlačítko **⌨ Klávesnice**,
+které ji vrátí.
+
+### Poznámky v mapě
+
+Do mapy (MAPA / Tab) si jde psát vlastní poznámky, stejně jako na PC:
+
+- Klepni na místo v mapě, kam chceš psát. Objeví se kurzor „_“ a otevře se klávesnice.
+- Enter poznámku uloží. Klepnutí jinam v mapě ji také uloží, podržení prstu (Esc) psaní zruší.
+- Klepnutím na existující poznámku ji upravíš. Když ji celou smažeš, z mapy zmizí.
 
 ---
 

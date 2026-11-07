@@ -6,15 +6,14 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.provider.Settings
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.Switch
 import android.widget.TextView
 import cz.gates.skeldal.R
 import cz.gates.skeldal.install.ImportException
@@ -33,7 +32,8 @@ class SavesActivity : Activity() {
     private lateinit var buttons: List<Button>
     private lateinit var syncInfo: TextView
     private lateinit var syncRun: Button
-    private val syncPrefs by lazy { getSharedPreferences("sync", Context.MODE_PRIVATE) }
+    private val syncConfig by lazy { SyncConfig(this) }
+    private lateinit var syncAuto: Switch
     private val ui = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +53,9 @@ class SavesActivity : Activity() {
         syncInfo = findViewById(R.id.sync_info)
         syncRun = findViewById(R.id.btn_sync_run)
         val syncChoose = findViewById<Button>(R.id.btn_sync_choose)
+        syncAuto = findViewById(R.id.switch_sync_auto)
+        syncAuto.isChecked = syncConfig.autoUpload
+        syncAuto.setOnCheckedChangeListener { _, on -> syncConfig.autoUpload = on }
         buttons = listOf(listBtn, export, import, restore, delete, close, syncRun, syncChoose)
         syncRun.setOnClickListener { syncPrepare() }
         syncChoose.setOnClickListener { chooseSyncFile() }
@@ -128,7 +131,7 @@ class SavesActivity : Activity() {
                 } catch (e: SecurityException) {
                     // provider without persistable permissions: works until the app is restarted
                 }
-                syncPrefs.edit().putString(KEY_URI, uri.toString()).apply()
+                syncConfig.uri = uri
                 syncStatus()
             }
             REQ_EXPORT -> background {
@@ -145,16 +148,11 @@ class SavesActivity : Activity() {
 
     // ---- synchronisation (see SaveSync) ---------------------------------------------------
 
-    private fun syncUri(): Uri? = syncPrefs.getString(KEY_URI, null)?.let { Uri.parse(it) }
+    private fun syncUri(): Uri? = syncConfig.uri
 
-    private fun deviceId(): String = syncPrefs.getString(KEY_DEVICE, null)
-        ?: java.util.UUID.randomUUID().toString().also { syncPrefs.edit().putString(KEY_DEVICE, it).apply() }
+    private fun deviceId(): String = syncConfig.deviceId
 
-    private fun deviceName(): String =
-        (try { Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME) } catch (e: Exception) { null })
-            ?.takeIf { it.isNotBlank() } ?: "${Build.MANUFACTURER} ${Build.MODEL}"
-
-    private fun sync() = SaveSync(File(filesDir, "saves"), cacheDir, deviceId(), deviceName())
+    private fun sync() = syncConfig.sync()
 
     private fun displayName(uri: Uri): String = try {
         contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
@@ -191,6 +189,7 @@ class SavesActivity : Activity() {
     private fun syncStatus() {
         val uri = syncUri()
         syncRun.isEnabled = uri != null
+        syncAuto.isEnabled = uri != null
         if (uri == null) { syncInfo.text = getString(R.string.sync_not_set); return }
         val name = displayName(uri)
         syncInfo.text = getString(R.string.sync_loading, name)
@@ -243,12 +242,7 @@ class SavesActivity : Activity() {
                     val up = plan.upload.size
                     val options = ArrayList<Pair<String, () -> String>>()
                     val write = { p: SaveSync.Plan ->
-                        s.apply(remote, p, {
-                            // "wt" truncates; some cloud providers only know "w" (which replaces the file there)
-                            (try { contentResolver.openOutputStream(uri, "wt") } catch (e: Exception) { null }
-                                ?: contentResolver.openOutputStream(uri, "w"))
-                                ?: throw ImportException("Do souboru nelze zapisovat.")
-                        })
+                        s.apply(remote, p, { syncConfig.openWrite(uri) })
                     }
                     if (down > 0) options.add(getString(R.string.sync_opt_download, down) to {
                         manager.backupNow(version())
@@ -346,8 +340,6 @@ class SavesActivity : Activity() {
         private const val REQ_IMPORT = 2
         private const val REQ_SYNC_NEW = 3
         private const val REQ_SYNC_OPEN = 4
-        private const val KEY_URI = "uri"
-        private const val KEY_DEVICE = "device_id"
 
         fun manager(a: Activity) = SaveGameManager(File(a.filesDir, "saves"), File(a.filesDir, "saves_backups"))
     }
