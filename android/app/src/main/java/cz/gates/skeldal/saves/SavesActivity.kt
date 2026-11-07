@@ -34,6 +34,7 @@ class SavesActivity : Activity() {
     private lateinit var syncRun: Button
     private val syncConfig by lazy { SyncConfig(this) }
     private lateinit var syncAuto: Switch
+    private lateinit var syncAutoDown: Switch
     private val ui = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +57,9 @@ class SavesActivity : Activity() {
         syncAuto = findViewById(R.id.switch_sync_auto)
         syncAuto.isChecked = syncConfig.autoUpload
         syncAuto.setOnCheckedChangeListener { _, on -> syncConfig.autoUpload = on }
+        syncAutoDown = findViewById(R.id.switch_sync_auto_down)
+        syncAutoDown.isChecked = syncConfig.autoDownload
+        syncAutoDown.setOnCheckedChangeListener { _, on -> syncConfig.autoDownload = on }
         buttons = listOf(listBtn, export, import, restore, delete, close, syncRun, syncChoose)
         syncRun.setOnClickListener { syncPrepare() }
         syncChoose.setOnClickListener { chooseSyncFile() }
@@ -190,6 +194,7 @@ class SavesActivity : Activity() {
         val uri = syncUri()
         syncRun.isEnabled = uri != null
         syncAuto.isEnabled = uri != null
+        syncAutoDown.isEnabled = uri != null
         if (uri == null) { syncInfo.text = getString(R.string.sync_not_set); return }
         val name = displayName(uri)
         syncInfo.text = getString(R.string.sync_loading, name)

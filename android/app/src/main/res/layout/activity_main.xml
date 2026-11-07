@@ -40,6 +40,11 @@
 
         <Button
             style="@style/LauncherButton"
+            android:id="@+id/btn_sync_notice"
+            android:visibility="gone" />
+
+        <Button
+            style="@style/LauncherButton"
             android:id="@+id/btn_start"
             android:text="@string/btn_start_game" />
 

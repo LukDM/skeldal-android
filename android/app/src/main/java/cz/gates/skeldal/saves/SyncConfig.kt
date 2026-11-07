@@ -22,6 +22,11 @@ class SyncConfig(private val context: Context) {
         get() = prefs.getBoolean(KEY_AUTO_UPLOAD, false)
         set(v) { prefs.edit().putBoolean(KEY_AUTO_UPLOAD, v).apply() }
 
+    /** Download newer saves from the sync file automatically when the launcher opens. */
+    var autoDownload: Boolean
+        get() = prefs.getBoolean(KEY_AUTO_DOWNLOAD, false)
+        set(v) { prefs.edit().putBoolean(KEY_AUTO_DOWNLOAD, v).apply() }
+
     /** Set when a game was started with [autoUpload] on; cleared after the upload. */
     var uploadPending: Boolean
         get() = prefs.getBoolean(KEY_PENDING, false)
@@ -62,10 +67,19 @@ class SyncConfig(private val context: Context) {
         return s.apply(remote, plan, { openWrite(u) }).uploaded
     }
 
+    /** Reads the sync file and returns what is newer there (call [SaveSync.Remote.dir] cleanup or [SaveSync.downloadOnly]). */
+    fun check(): Pair<SaveSync.Remote, SaveSync.Plan>? {
+        val u = uri ?: return null
+        val s = sync()
+        val remote = s.readRemote { context.contentResolver.openInputStream(u) }
+        return remote to s.plan(remote)
+    }
+
     companion object {
         private const val KEY_URI = "uri"
         private const val KEY_DEVICE = "device_id"
         private const val KEY_AUTO_UPLOAD = "auto_upload"
         private const val KEY_PENDING = "upload_pending"
+        private const val KEY_AUTO_DOWNLOAD = "auto_download"
     }
 }

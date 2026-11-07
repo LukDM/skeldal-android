@@ -9,6 +9,11 @@ v Kotlinu, malý JNI most a platformní vrstva `platform/android/`.
 **Aplikace neobsahuje žádná herní data.** Uživatel si je importuje ze své legálně získané
 kopie (DOS/CD, Windows, Steam, GOG).
 
+Jedinou výjimkou je opravená mapa Bílé věže `data/maps/BILA_VEZ.MAP` z repozitáře enginu
+(licence MIT). Opravuje chybu ve skriptu logické hádanky v posledním patře a funguje jen
+s novým enginem. Před každým spuštěním hry ji launcher nahraje přes importovaný soubor
+(`install/GameFixes.kt`); původní soubor si uloží do `files/fixes_backup/`.
+
 ## Požadavky
 
 | Nástroj | Verze |
@@ -128,6 +133,7 @@ Aplikace má ID balíčku `cz.gates.skeldal`.
 | `files/game/` | importovaná herní data |
 | `files/saves/` | uložené pozice (stejný formát jako PC) |
 | `files/saves_backups/` | automatické zálohy před importem pozic (5 posledních) |
+| `files/fixes_backup/` | původní verze herních souborů nahrazených opravami (`BILA_VEZ.MAP`) |
 | `files/skeldal.ini` | konfigurace generovaná launcherem z nastavení |
 | `files/logs/game.log`, `game.prev.log` | log posledního a předposledního spuštění |
 | `files/installations/default.properties` | metadata instalace |

@@ -62,6 +62,11 @@
     <string name="sync_auto_hint">Po návratu ze hry do aplikace se nové a změněné pozice z tohoto zařízení samy nahrají do synchronizačního souboru (jako „Jen nahrát“). Pozice v tomto zařízení se nemění a novější pozice v cloudu se nepřepíšou. Když aplikaci zavřete přímo ze hry (třeba odsunutím z přehledu aplikací), pozice se nahrají při dalším spuštění aplikace.</string>
     <string name="sync_auto_done">Pozice nahrány do cloudu: %1$d</string>
     <string name="sync_auto_failed">Automatické nahrání pozic do cloudu se nepodařilo: %1$s</string>
+    <string name="sync_auto_down">Při otevření aplikace automaticky stáhnout novější pozice z cloudu</string>
+    <string name="sync_auto_down_hint">Když je v cloudu novější nebo chybějící pozice, sama se stáhne do tohoto zařízení (jako „Jen stáhnout“, předtím se pozice zazálohují). Když je volba vypnutá, na hlavní obrazovce se jen ukáže upozornění, že v cloudu jsou novější pozice.</string>
+    <string name="sync_notice">☁ V cloudu jsou novější pozice (%1$d) – otevřít Uložené pozice</string>
+    <string name="sync_auto_down_done">Staženo z cloudu: %1$d pozic</string>
+    <string name="sync_auto_down_failed">Automatické stažení pozic z cloudu se nepodařilo: %1$s</string>
     <string name="sync_game_running">Hra právě běží. Ukončete ji, a pak synchronizujte.</string>
     <string name="sync_hint">Pozice se nepřenášejí přímo mezi zařízeními, ale přes jeden soubor v cloudu (např. na Google Disku). Na prvním zařízení soubor vytvořte, na dalších vyberte tentýž.\n\n• Stáhnout = vezme z cloudu pozice, které tu chybí nebo jsou tam novější.\n• Nahrát = uloží do cloudu pozice z tohoto zařízení, které tam chybí nebo jsou tu novější. Ostatní zařízení se tím nezmění, dokud si je samy nestáhnou.\n\nNic se nemaže a před stažením se pozice v tomto zařízení zazálohují.</string>
 </resources>

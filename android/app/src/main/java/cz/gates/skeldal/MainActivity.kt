@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import cz.gates.skeldal.diag.CrashMonitor
+import cz.gates.skeldal.install.GameFixes
 import cz.gates.skeldal.install.GameImporter
 import cz.gates.skeldal.install.GameInstallationDetector
 import cz.gates.skeldal.install.ImportException
@@ -43,6 +44,7 @@ class MainActivity : Activity() {
     private lateinit var btnImportFolder: Button
     private lateinit var btnImportZip: Button
     private lateinit var btnFiles: Button
+    private lateinit var syncNotice: Button
     private val ui = Handler(Looper.getMainLooper())
     private lateinit var repo: InstallationRepository
     private val crashMonitor by lazy { CrashMonitor(filesDir) }
@@ -66,9 +68,9 @@ class MainActivity : Activity() {
         btnImportFolder.setOnClickListener { pickFolder() }
         btnImportZip.setOnClickListener { pickZip() }
         btnFiles.setOnClickListener { showManageDialog() }
-        findViewById<Button>(R.id.btn_saves).setOnClickListener {
-            startActivity(Intent(this, cz.gates.skeldal.saves.SavesActivity::class.java))
-        }
+        findViewById<Button>(R.id.btn_saves).setOnClickListener { openSaves() }
+        syncNotice = findViewById(R.id.btn_sync_notice)
+        syncNotice.setOnClickListener { openSaves() }
         findViewById<Button>(R.id.btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -80,9 +82,9 @@ class MainActivity : Activity() {
         super.onResume()
         refreshState()
         if (busyState == null) reportLastRun()
-        autoUploadAttempts = 0
-        ui.removeCallbacks(autoUploadCheck)
-        ui.post(autoUploadCheck)
+        cloudAttempts = 0
+        ui.removeCallbacks(cloudCheck)
+        ui.post(cloudCheck)
         // gamepad / D-pad navigation starts on the most useful button
         (if (btnStart.isEnabled) btnStart else btnImportFolder).requestFocus()
     }
@@ -152,45 +154,106 @@ class MainActivity : Activity() {
             message(getString(R.string.error_config))
             return
         }
+        try {
+            // corrected data files from the engine repository (White Tower puzzle)
+            GameFixes(repo.gameDir, File(filesDir, "fixes_backup")) { assets.open(it) }.apply()
+        } catch (e: Exception) {
+            // the game still runs with the original files
+        }
         val sync = SyncConfig(this)
         if (sync.autoUpload && sync.uri != null) sync.uploadPending = true
+        cloudCheckedAt = 0
+        syncNotice.visibility = View.GONE
         startActivity(Intent(this, GameActivity::class.java))
     }
 
-    // ---- automatic upload of the saves after the game (SyncConfig.autoUpload) --------------
+    // ---- cloud saves: automatic upload after the game, newer saves in the cloud (SyncConfig) ----
 
-    private var autoUploadAttempts = 0
-    private var autoUploadRunning = false
+    private var cloudAttempts = 0
+    private var cloudRunning = false
+    /** time of the last read of the sync file; 0 = read it on the next resume */
+    private var cloudCheckedAt = 0L
 
-    /** Waits until the game process has ended (it may take a moment after returning), then uploads. */
-    private val autoUploadCheck: Runnable = object : Runnable {
+    /**
+     * Uploads the saves after a game (if switched on), then looks whether the sync file holds newer
+     * saves: downloads them (if switched on) or shows the notice button. Waits until the game
+     * process has ended (it may take a moment after returning to the launcher).
+     */
+    private val cloudCheck: Runnable = object : Runnable {
         override fun run() {
+            if (cloudRunning || isFinishing) return
             val sync = SyncConfig(this@MainActivity)
-            if (!sync.uploadPending || autoUploadRunning || isFinishing) return
-            if (!sync.autoUpload || sync.uri == null) { sync.uploadPending = false; return }
+            if (sync.uri == null) { sync.uploadPending = false; showSyncNotice(0); return }
+            val upload = sync.uploadPending && sync.autoUpload
+            if (!sync.autoUpload) sync.uploadPending = false
+            val stale = System.currentTimeMillis() - cloudCheckedAt > CLOUD_CHECK_INTERVAL
+            if (!upload && !stale) return
             if (gameProcessAlive()) {
                 // the game is still running (e.g. only switched to the launcher): try again a bit later
-                if (++autoUploadAttempts < 10) ui.postDelayed(this, 1000)
+                if (++cloudAttempts < 10) ui.postDelayed(this, 1000)
                 return
             }
-            autoUploadRunning = true
+            cloudRunning = true
             val app = applicationContext
+            val version = appVersion()
             Thread {
-                val msg = try {
+                val messages = ArrayList<String>()
+                var newer = 0
+                if (upload) try {
                     val n = sync.uploadNow()
                     sync.uploadPending = false
-                    if (n > 0) getString(R.string.sync_auto_done, n) else null
+                    if (n > 0) messages.add(getString(R.string.sync_auto_done, n))
                 } catch (e: Exception) {
                     // stays pending: the next start of the launcher tries again
-                    getString(R.string.sync_auto_failed, (e as? ImportException)?.message ?: e.javaClass.simpleName)
+                    messages.add(getString(R.string.sync_auto_failed, errorText(e)))
+                }
+                try {
+                    val (remote, plan) = sync.check() ?: (null to null)
+                    if (remote != null && plan != null) {
+                        if (plan.download.isNotEmpty() && sync.autoDownload) {
+                            try {
+                                cz.gates.skeldal.saves.SavesActivity.manager(this@MainActivity).backupNow(version)
+                                val n = sync.sync().downloadOnly(remote, plan)
+                                messages.add(getString(R.string.sync_auto_down_done, n))
+                            } catch (e: Exception) {
+                                remote.dir?.deleteRecursively()
+                                messages.add(getString(R.string.sync_auto_down_failed, errorText(e)))
+                                newer = plan.download.size
+                            }
+                        } else {
+                            remote.dir?.deleteRecursively()
+                            newer = plan.download.size
+                        }
+                    }
+                    cloudCheckedAt = System.currentTimeMillis()
+                } catch (e: Exception) {
+                    // offline or the file is not reachable: no notice, try again next time
                 }
                 ui.post {
-                    autoUploadRunning = false
-                    if (msg != null) Toast.makeText(app, msg, Toast.LENGTH_LONG).show()
+                    cloudRunning = false
+                    showSyncNotice(newer)
+                    for (m in messages) Toast.makeText(app, m, Toast.LENGTH_LONG).show()
                 }
             }.start()
         }
     }
+
+    private fun errorText(e: Exception) = (e as? ImportException)?.message ?: e.javaClass.simpleName
+
+    private fun showSyncNotice(newer: Int) {
+        if (isFinishing) return
+        syncNotice.visibility = if (newer > 0) View.VISIBLE else View.GONE
+        if (newer > 0) syncNotice.text = getString(R.string.sync_notice, newer)
+    }
+
+    private fun openSaves() {
+        cloudCheckedAt = 0   // the user may synchronise there: look again after returning
+        startActivity(Intent(this, cz.gates.skeldal.saves.SavesActivity::class.java))
+    }
+
+    private fun appVersion(): String = try {
+        packageManager.getPackageInfo(packageName, 0).versionName ?: "?"
+    } catch (e: Exception) { "?" }
 
     // ---- import --------------------------------------------------------------------------
 
@@ -504,6 +567,7 @@ class MainActivity : Activity() {
     companion object {
         private const val REQ_PICK_FOLDER = 1
         private const val REQ_PICK_ZIP = 2
+        private const val CLOUD_CHECK_INTERVAL = 60_000L
     }
 }
 
