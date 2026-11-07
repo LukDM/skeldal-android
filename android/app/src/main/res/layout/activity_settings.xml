@@ -270,6 +270,15 @@
             style="@style/SettingsSwitch"
             android:text="@string/settings_always_minimap" />
 
+        <Switch
+            android:id="@+id/switch_auto_pickup"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_auto_pickup" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_auto_pickup_hint" />
+
         <TextView
             style="@style/SettingsLabel"
             android:text="@string/settings_enemy_lives" />

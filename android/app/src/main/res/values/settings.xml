@@ -71,6 +71,8 @@ Pokud se nic nestane, tlačítko neposílá do aplikací žádný kód. Na někt
     <string name="settings_language_ok">Importovaná data obsahují tyto jazyky: %1$s.</string>
     <string name="settings_language_missing">Importovaná data neobsahují angličtinu (složku lang/en), hra poběží česky.</string>
     <string name="settings_autosave_quit">Automaticky uložit při ukončení hry (Konec)</string>
+    <string name="settings_auto_pickup">Sebrané předměty rovnou do inventáře</string>
+    <string name="settings_auto_pickup_hint">Klepnutím na předmět na zemi se uloží do volného místa v inventáři vybrané postavy, a když nemá místo, tak jiné postavy na stejném políčku. Když místo nemá nikdo, zůstane předmět v ruce jako dřív. Se zapnutým tlačítkem CTRL se předmět vezme do ruky (např. k hození nebo vložení do batohu).</string>
     <string name="settings_save_refresh">Při přepsání pozice aktualizovat její název</string>
     <string name="settings_save_refresh_hint">Pozice s názvem, který vytvořila hra (místo a čas, např. „Caredbar 00:24“), dostane při přepsání aktuální místo a čas. Názvy, které jste napsali sami, zůstanou.</string>
     <string name="settings_section_mods">Úpravy hry</string>

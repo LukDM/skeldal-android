@@ -29,6 +29,7 @@ class SettingsActivity : Activity() {
     private lateinit var videoLines: Switch
     private lateinit var portrait: Switch
     private lateinit var minimap: Switch
+    private lateinit var autoPickup: Switch
     private lateinit var enemyLives: Spinner
     private lateinit var overlayDim: Spinner
     private lateinit var overlayEnemies: Switch
@@ -81,6 +82,7 @@ class SettingsActivity : Activity() {
         videoLines = findViewById(R.id.switch_video_scanlines)
         portrait = findViewById(R.id.switch_allow_portrait)
         minimap = findViewById(R.id.switch_always_minimap)
+        autoPickup = findViewById(R.id.switch_auto_pickup)
         enemyLives = findViewById(R.id.spinner_enemy_lives)
         overlayDim = findViewById(R.id.spinner_overlay_dim)
         overlayEnemies = findViewById(R.id.switch_overlay_enemies)
@@ -161,7 +163,7 @@ class SettingsActivity : Activity() {
 
         val select = SimpleSelect { save() }
         for (sp in listOf(scaling, crt, touchMode, language, enemyLives, gameSpeed, overlayDim)) sp.onItemSelectedListener = select
-        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, overlayEnemies, livesBattle, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
+        for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, autoPickup, overlayEnemies, livesBattle, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
                           ctrlEnabled, swapSticks, autosaveBg, autosaveQuit, saveRefresh) + optionalSwitches.values) {
             sw.setOnCheckedChangeListener { _, _ -> save() }
         }
@@ -220,6 +222,7 @@ class SettingsActivity : Activity() {
         videoLines.isChecked = s.videoScanlines
         portrait.isChecked = s.allowPortrait
         minimap.isChecked = s.alwaysMinimap
+        autoPickup.isChecked = s.autoPickup
         enemyLives.setSelection(enemyLivesValues.indexOf(s.enemyLives))
         overlayDim.setSelection(overlayDimValues.indexOf(s.overlayDim))
         overlayEnemies.isChecked = s.overlayEnemies
@@ -254,6 +257,7 @@ class SettingsActivity : Activity() {
                 videoScanlines = videoLines.isChecked,
                 allowPortrait = portrait.isChecked,
                 alwaysMinimap = minimap.isChecked,
+                autoPickup = autoPickup.isChecked,
                 enemyLives = enemyLivesValues[enemyLives.selectedItemPosition.coerceIn(enemyLivesValues.indices)],
                 overlayDim = overlayDimValues[overlayDim.selectedItemPosition.coerceIn(overlayDimValues.indices)],
                 overlayEnemies = overlayEnemies.isChecked,

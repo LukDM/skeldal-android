@@ -1437,6 +1437,8 @@ extern char autosave_on_enter;
 extern char cfg_autosave_on_quit;
 /// [game] save_refresh_name: overwriting a save with a generated name (map + time) gives it the current one
 extern char cfg_save_refresh_name;
+/// [game] auto_pickup: a clicked item goes straight into a free inventory slot
+extern char cfg_auto_pickup;
 int load_map_automap(char *mapfile);
  /* ^^^ Tato funkce zmeni mapu, bez zmeny grafiky a stavu cele hry.
     Jeji vyuziti je pro zobrazeni automapingu jineho levelu nez aktualniho

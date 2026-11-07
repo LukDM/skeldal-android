@@ -169,6 +169,9 @@ V Nastavení → Úpravy hry:
   - Ukazuje prozkoumanou část patra přes celý pohled.
   - Je otočená podle směru chůze a družina je uprostřed.
   - Obraz pod ní jde ztmavit (slabě nebo silně) a nepřátele na ní jde skrýt.
+- **Sebrané předměty rovnou do inventáře**: klepnutý předmět na zemi se uloží do volného místa
+  v inventáři (nejdřív vybrané postavy, pak ostatních na políčku). Když nikdo nemá místo,
+  zůstane v ruce. Se zapnutým **CTRL** se předmět vezme do ruky jako dřív.
 - **Rychlost hry**: normální, rychlá nebo velmi rychlá.
 - **Konzole**: tlačítko KONZOLE nebo klávesa `.
   - Příkazy: `hunter-instinct on` (životy), `true-seeing on` (skryté stěny), `iron-skin on` (nesmrtelnost), `ghost-walls on` (procházení zdí).

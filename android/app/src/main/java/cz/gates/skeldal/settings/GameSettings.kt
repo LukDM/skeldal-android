@@ -16,6 +16,8 @@ data class GameSettings(
     val allowPortrait: Boolean = true,
     /** Small map in the corner also outside of battle (engine extra EX_ALWAYS_MINIMAP). */
     val alwaysMinimap: Boolean = false,
+    /** clicked items go straight into a free inventory slot ([game] auto_pickup) */
+    val autoPickup: Boolean = false,
     // game mods ("Úpravy hry")
     /** Remaining lives shown above enemies. */
     val enemyLives: EnemyLives = EnemyLives.OFF,
@@ -115,6 +117,7 @@ data class GameSettings(
         "videoScanlines" to videoScanlines,
         "allowPortrait" to allowPortrait,
         "alwaysMinimap" to alwaysMinimap,
+        "autoPickup" to autoPickup,
         "enemyLives" to enemyLives.name,
         "enemyLivesBattleOnly" to enemyLivesBattleOnly,
         "overlayDim" to overlayDim.name,
@@ -169,6 +172,7 @@ data class GameSettings(
                 videoScanlines = (m["videoScanlines"] as? Boolean) ?: d.videoScanlines,
                 allowPortrait = (m["allowPortrait"] as? Boolean) ?: d.allowPortrait,
                 alwaysMinimap = (m["alwaysMinimap"] as? Boolean) ?: d.alwaysMinimap,
+                autoPickup = (m["autoPickup"] as? Boolean) ?: d.autoPickup,
                 enemyLives = enumOr(m["enemyLives"], d.enemyLives),
                 enemyLivesBattleOnly = (m["enemyLivesBattleOnly"] as? Boolean) ?: d.enemyLivesBattleOnly,
                 overlayDim = enumOr(m["overlayDim"], d.overlayDim),

@@ -1781,6 +1781,7 @@ int skeldal_entry_point(const SKELDAL_CONFIG *start_cfg)
       overlay_map_enemies = ini_get_boolean(gsec, "overlay_map_enemies", 1) == 1;
       cfg_autosave_on_quit = ini_get_boolean(gsec, "autosave_on_quit", 1) == 1;
       cfg_save_refresh_name = ini_get_boolean(gsec, "save_refresh_name", 0) == 1;
+      cfg_auto_pickup = ini_get_boolean(gsec, "auto_pickup", 0) == 1;
       cfg_lives_battle_only = ini_get_boolean(gsec, "enemy_lives_battle_only", 0) == 1;
   }
   if (!change_current_directory(groot)) {

@@ -661,6 +661,50 @@ static int get_top_of_next(int sect,int id) //vraci souradnici predmetu na nasle
 
   }
 
+char cfg_auto_pickup = 0;
+
+static int free_inv_slots(const THUMAN *p)
+  {
+  int i,n=0,sz=p->inv_size>MAX_INV?MAX_INV:p->inv_size;
+  for(i=0;i<sz;i++) if (!p->inv[i]) n++;
+  return n;
+  }
+
+static char can_auto_pickup(const THUMAN *p)
+  {
+  return p->used && p->lives>0 && p->sektor==viewsector && p->inmaphash==current_map_hash && !isdemon(p);
+  }
+
+/// Puts the item in the hand (picked_item, with the contents of a container) into the inventory of
+/// the selected character, or of another one standing here, who has room for all of it.
+/// If nobody has room, the item stays in the hand like in the original game.
+static void auto_pickup_to_inv(void)
+  {
+  int i,need=count_items_total(picked_item);
+  THUMAN *who=NULL;
+  char arrow=glob_items[*picked_item-1].umisteni==PL_SIP;
+
+  if (can_auto_pickup(human_selected) && (arrow || free_inv_slots(human_selected)>=need)) who=human_selected;
+  for(i=0;who==NULL && i<POCET_POSTAV;i++)
+     {
+     THUMAN *p=postavy+group_sort[i];
+     if (can_auto_pickup(p) && (arrow || free_inv_slots(p)>=need)) who=p;
+     }
+  if (who==NULL) return;
+  {
+     char text[100];
+     snprintf(text,sizeof(text),"%s -> %s",glob_items[*picked_item-1].jmeno,who->jmeno);
+     if (!put_item_to_inv(who,picked_item))
+        {
+        // arrows with a full quiver and no free slot: nothing changed, keep them in the hand
+        if (picked_item[0]) return;
+        }
+     free(picked_item);
+     picked_item=NULL;
+     bott_disp_text(text);
+  }
+  }
+
 char pick_item_(int id,int xa,int ya,int xr,int yr)
   {
   int sect;
@@ -743,6 +787,10 @@ char pick_item_(int id,int xa,int ya,int xr,int yr)
         {
         pop_item(sect,idd,0,&picked_item);
         if (picked_item!=NULL) do_items_specs();
+        // [game] auto_pickup: the item goes straight into a free inventory slot (Ctrl + click
+        // takes it into the hand as before)
+        if (picked_item!=NULL && cfg_auto_pickup && cur_mode!=MD_INV && !get_control_key_state())
+           auto_pickup_to_inv();
         pick_set_cursor();
         }
      return (picked_item!=NULL);

@@ -33,6 +33,7 @@ object GameConfigWriter {
         append("autosave_on_quit=").append(onOff(settings.autosaveOnQuit)).append('\n')
         append("save_refresh_name=").append(onOff(settings.saveRefreshName)).append('\n')
         append("always_minimap=").append(onOff(settings.alwaysMinimap)).append('\n')
+        append("auto_pickup=").append(onOff(settings.autoPickup)).append('\n')
         append("show_enemy_lives=").append(settings.enemyLives.ini).append('\n')
         append("enemy_lives_battle_only=").append(onOff(settings.enemyLivesBattleOnly)).append('\n')
         append("overlay_map_dim=").append(settings.overlayDim.ini).append('\n')
