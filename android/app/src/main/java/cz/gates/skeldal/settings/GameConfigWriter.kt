@@ -30,6 +30,8 @@ object GameConfigWriter {
         append("autosave_on_background=").append(onOff(settings.autosaveOnBackground)).append('\n')
         append('\n')
         append("[game]\n")
+        append("autosave_on_quit=").append(onOff(settings.autosaveOnQuit)).append('\n')
+        append("save_refresh_name=").append(onOff(settings.saveRefreshName)).append('\n')
         append("always_minimap=").append(onOff(settings.alwaysMinimap)).append('\n')
         append("show_enemy_lives=").append(settings.enemyLives.ini).append('\n')
         append("enemy_lives_battle_only=").append(onOff(settings.enemyLivesBattleOnly)).append('\n')

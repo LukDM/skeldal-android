@@ -70,6 +70,9 @@ Pokud se nic nestane, tlačítko neposílá do aplikací žádný kód. Na někt
     <string name="settings_language">Jazyk hry</string>
     <string name="settings_language_ok">Importovaná data obsahují tyto jazyky: %1$s.</string>
     <string name="settings_language_missing">Importovaná data neobsahují angličtinu (složku lang/en), hra poběží česky.</string>
+    <string name="settings_autosave_quit">Automaticky uložit při ukončení hry (Konec)</string>
+    <string name="settings_save_refresh">Při přepsání pozice aktualizovat její název</string>
+    <string name="settings_save_refresh_hint">Pozice s názvem, který vytvořila hra (místo a čas, např. „Caredbar 00:24“), dostane při přepsání aktuální místo a čas. Názvy, které jste napsali sami, zůstanou.</string>
     <string name="settings_section_mods">Úpravy hry</string>
     <string name="settings_mods_hint">Funkce nad rámec původní hry. Usnadňují hraní, ale mění původní zážitek. Uložené pozice zůstávají kompatibilní s PC.</string>
     <string name="settings_enemy_lives">Životy nepřátel</string>

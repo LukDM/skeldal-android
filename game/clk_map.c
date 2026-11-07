@@ -200,6 +200,8 @@ char konec(int id,int xa,int ya,int xr,int yr)
  if (!message(2,0,1,texty[118],texty[76],texty[77],texty[78]))
   {
   if (cur_mode==MD_ANOTHER_MAP) unwire_proc(),wire_proc();
+  // [game] autosave_on_quit: the automatic save also when the game is left through the menu
+  if (cfg_autosave_on_quit && !battle && cur_mode==MD_GAME) autosave();
   send_message(E_CLOSE_MAP);
   }
  else {

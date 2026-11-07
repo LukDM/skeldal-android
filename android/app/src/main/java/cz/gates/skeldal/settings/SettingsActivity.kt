@@ -61,6 +61,8 @@ class SettingsActivity : Activity() {
     private val languageValues = GameSettings.Language.values()
     private lateinit var language: Spinner
     private lateinit var autosaveBg: Switch
+    private lateinit var autosaveQuit: Switch
+    private lateinit var saveRefresh: Switch
     private val optionalSwitches = LinkedHashMap<cz.gates.skeldal.touch.GameAction, Switch>()
 
     private var loading = false
@@ -115,6 +117,8 @@ class SettingsActivity : Activity() {
         overlayDim.adapter = adapter(R.array.overlay_dim_labels)
         touchMode.adapter = adapter(R.array.touch_mode_labels)
         autosaveBg = findViewById(R.id.switch_autosave_bg)
+        autosaveQuit = findViewById(R.id.switch_autosave_quit)
+        saveRefresh = findViewById(R.id.switch_save_refresh)
         val optBox = findViewById<android.widget.LinearLayout>(R.id.optional_buttons)
         val labels = mapOf(
             cz.gates.skeldal.touch.GameAction.SAVE to "ULOŽIT (F2 – uložit hru)",
@@ -158,7 +162,7 @@ class SettingsActivity : Activity() {
         val select = SimpleSelect { save() }
         for (sp in listOf(scaling, crt, touchMode, language, enemyLives, gameSpeed, overlayDim)) sp.onItemSelectedListener = select
         for (sw in listOf(fullscreen, smooth, vsync, videoLines, portrait, minimap, overlayEnemies, livesBattle, leftHanded, centered, dpad, bMenu, bMap, bAction, bBattle, longPress,
-                          ctrlEnabled, swapSticks, autosaveBg) + optionalSwitches.values) {
+                          ctrlEnabled, swapSticks, autosaveBg, autosaveQuit, saveRefresh) + optionalSwitches.values) {
             sw.setOnCheckedChangeListener { _, _ -> save() }
         }
         val seek = object : SeekBar.OnSeekBarChangeListener {
@@ -207,6 +211,8 @@ class SettingsActivity : Activity() {
         touchMode.setSelection(touchModeValues.indexOf(s.touchMode))
         language.setSelection(languageValues.indexOf(s.language))
         autosaveBg.isChecked = s.autosaveOnBackground
+        autosaveQuit.isChecked = s.autosaveOnQuit
+        saveRefresh.isChecked = s.saveRefreshName
         for ((a, sw) in optionalSwitches) sw.isChecked = a in s.touchExtraButtons
         fullscreen.isChecked = s.fullscreen
         smooth.isChecked = s.smoothScaling
@@ -269,6 +275,8 @@ class SettingsActivity : Activity() {
                 swapSticks = swapSticks.isChecked,
                 language = languageValues[language.selectedItemPosition.coerceIn(languageValues.indices)],
                 autosaveOnBackground = autosaveBg.isChecked,
+                autosaveOnQuit = autosaveQuit.isChecked,
+                saveRefreshName = saveRefresh.isChecked,
                 touchExtraButtons = optionalSwitches.filterValues { it.isChecked }.keys,
             )
         )

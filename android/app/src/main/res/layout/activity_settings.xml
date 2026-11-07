@@ -243,6 +243,11 @@
             style="@style/SettingsHint"
             android:text="@string/settings_autosave_bg_hint" />
 
+        <Switch
+            android:id="@+id/switch_autosave_quit"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_autosave_quit" />
+
         <TextView
             style="@style/SettingsSection"
             android:text="@string/settings_section_mods" />
@@ -250,6 +255,15 @@
         <TextView
             style="@style/SettingsHint"
             android:text="@string/settings_mods_hint" />
+
+        <Switch
+            android:id="@+id/switch_save_refresh"
+            style="@style/SettingsSwitch"
+            android:text="@string/settings_save_refresh" />
+
+        <TextView
+            style="@style/SettingsHint"
+            android:text="@string/settings_save_refresh_hint" />
 
         <Switch
             android:id="@+id/switch_always_minimap"

@@ -1,5 +1,6 @@
 #include <platform/platform.h>
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -2040,12 +2041,28 @@ static const char *find_autosave(const char *name) {
 
 }
 */
+char cfg_autosave_on_quit = 1;
+char cfg_save_refresh_name = 0;
+
+/// a name the game generated (DEFAULT_GAME_NAME: "<map> HH:MM"), not one typed by the player
+static char is_generated_save_name(const char *name) {
+    size_t len = strlen(name);
+    if (len < 6) return 0;
+    const char *p = name + len;
+    if (!isdigit((unsigned char)p[-1]) || !isdigit((unsigned char)p[-2]) || p[-3] != ':') return 0;
+    p -= 3;
+    int digits = 0;
+    while (p > name && isdigit((unsigned char)p[-1])) { --p; ++digits; }
+    return digits >= 2 && p > name && p[-1] == ' ';
+}
+
 static void save_as_dialog(int pos) {
     DEFAULT_GAME_NAME("");
     const char *todel = current_game_slot_list.files[pos];
     const char *name = get_savegame_name(&current_game_slot_list,pos);
     if (todel != NULL)  {
-        strcopy_n(game_name, name, sizeof(game_name));
+        if (!(cfg_save_refresh_name && is_generated_save_name(name)))
+            strcopy_n(game_name, name, sizeof(game_name));
         todel = build_pathname(2,gpathtable[SR_SAVES],todel);
         todel = local_strdup(todel);
     }

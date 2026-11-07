@@ -32,6 +32,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -1308,6 +1309,36 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         return event.isPrintingKey() || event.getKeyCode() == KeyEvent.KEYCODE_SPACE;
     }
 
+    /*
+     * Skeldal change: key events from a soft keyboard (Gboard sends digits this way) were turned
+     * into text with the key character map of the system keyboard layout - on a Czech layout the
+     * digit row gave "+ěščřžýáíé" and "!@#..." gave the digits. Soft keyboard keys use the
+     * virtual (US) key character map; digits are mapped explicitly.
+     */
+    static boolean isSoftKeyboardEvent(KeyEvent event) {
+        if ((event.getFlags() & KeyEvent.FLAG_SOFT_KEYBOARD) != 0) return true;
+        if (event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD) return true;
+        InputDevice d = event.getDevice();
+        return d == null || d.isVirtual();
+    }
+
+    static int textInputChar(KeyEvent event) {
+        if (!isSoftKeyboardEvent(event)) return event.getUnicodeChar();
+        int k = event.getKeyCode();
+        if (k >= KeyEvent.KEYCODE_0 && k <= KeyEvent.KEYCODE_9) {
+            int digit = k - KeyEvent.KEYCODE_0;
+            return event.isShiftPressed() ? ")!@#$%^&*(".charAt(digit) : '0' + digit;
+        }
+        if (k >= KeyEvent.KEYCODE_NUMPAD_0 && k <= KeyEvent.KEYCODE_NUMPAD_9) return '0' + (k - KeyEvent.KEYCODE_NUMPAD_0);
+        try {
+            int c = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD).get(k, event.getMetaState());
+            if (c != 0) return c;
+        } catch (Exception e) {
+            // fall back to the event's own map
+        }
+        return event.getUnicodeChar();
+    }
+
     public static boolean handleKeyEvent(View v, int keyCode, KeyEvent event, InputConnection ic) {
         int deviceId = event.getDeviceId();
         int source = event.getSource();
@@ -1361,10 +1392,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             if (isTextInputEvent(event)) {
+                int uc = textInputChar(event);
                 if (ic != null) {
-                    ic.commitText(String.valueOf((char) event.getUnicodeChar()), 1);
+                    ic.commitText(String.valueOf((char) uc), 1);
                 } else {
-                    SDLInputConnection.nativeCommitText(String.valueOf((char) event.getUnicodeChar()), 1);
+                    SDLInputConnection.nativeCommitText(String.valueOf((char) uc), 1);
                 }
             }
             onNativeKeyDown(keyCode);

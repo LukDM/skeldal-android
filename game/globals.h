@@ -1433,6 +1433,10 @@ void do_autosave();
 #define autosave() if (autosave_enabled) do_autosave();
 extern char autosave_enabled;
 extern char autosave_on_enter;
+/// [game] autosave_on_quit (Konec in the menu)
+extern char cfg_autosave_on_quit;
+/// [game] save_refresh_name: overwriting a save with a generated name (map + time) gives it the current one
+extern char cfg_save_refresh_name;
 int load_map_automap(char *mapfile);
  /* ^^^ Tato funkce zmeni mapu, bez zmeny grafiky a stavu cele hry.
     Jeji vyuziti je pro zobrazeni automapingu jineho levelu nez aktualniho

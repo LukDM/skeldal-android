@@ -54,6 +54,10 @@ data class GameSettings(
     val touchExtraButtons: Set<cz.gates.skeldal.touch.GameAction> = emptySet(),
     /** Save the game automatically (like F5) when the app goes to the background. */
     val autosaveOnBackground: Boolean = true,
+    /** Automatic save when the game is ended through the menu (Konec). */
+    val autosaveOnQuit: Boolean = true,
+    /** Overwriting a save with a generated name (place + time) updates the name. */
+    val saveRefreshName: Boolean = false,
     // gamepad (Milestone 5)
     val controllerEnabled: Boolean = true,
     val swapSticks: Boolean = false,
@@ -135,6 +139,8 @@ data class GameSettings(
         "touchButtonSizes" to touchButtonSizes.entries.joinToString(";") { "${it.key.name}:${it.value}" },
         "touchExtraButtons" to touchExtraButtons.joinToString(",") { it.name },
         "autosaveOnBackground" to autosaveOnBackground,
+        "autosaveOnQuit" to autosaveOnQuit,
+        "saveRefreshName" to saveRefreshName,
         "controllerEnabled" to controllerEnabled,
         "swapSticks" to swapSticks,
         "slowCursorWithMod" to slowCursorWithMod,
@@ -189,6 +195,8 @@ data class GameSettings(
                 touchExtraButtons = (m["touchExtraButtons"] as? String).orEmpty().split(',')
                     .mapNotNull { n -> cz.gates.skeldal.touch.GameAction.OPTIONAL_BUTTONS.firstOrNull { it.name == n } }.toSet(),
                 autosaveOnBackground = (m["autosaveOnBackground"] as? Boolean) ?: d.autosaveOnBackground,
+                autosaveOnQuit = (m["autosaveOnQuit"] as? Boolean) ?: d.autosaveOnQuit,
+                saveRefreshName = (m["saveRefreshName"] as? Boolean) ?: d.saveRefreshName,
                 controllerEnabled = (m["controllerEnabled"] as? Boolean) ?: d.controllerEnabled,
                 swapSticks = (m["swapSticks"] as? Boolean) ?: d.swapSticks,
                 controllerMapping = readMapping(m, d.controllerMapping),

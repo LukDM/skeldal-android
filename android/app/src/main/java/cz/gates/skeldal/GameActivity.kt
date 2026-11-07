@@ -192,7 +192,8 @@ class GameActivity : SDLActivity() {
     }
 
     private fun isSoftKeyboard(e: KeyEvent): Boolean =
-        e.deviceId == android.view.KeyCharacterMap.VIRTUAL_KEYBOARD || e.device?.isVirtual == true
+        (e.flags and KeyEvent.FLAG_SOFT_KEYBOARD) != 0 ||
+            e.deviceId == android.view.KeyCharacterMap.VIRTUAL_KEYBOARD || e.device?.isVirtual != false
 
     /** BIOS code of a digit / shifted digit symbol (US layout like the game), 0 = not such a key. */
     private fun softDigit(e: KeyEvent): Int {
