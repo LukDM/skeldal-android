@@ -124,4 +124,53 @@ class SaveSyncTest {
         m.restore(backup!!, "test")
         assertEquals(2, SaveGameManager.saveFiles(dir).size)
     }
+
+    private fun knownDevice(name: String): Pair<File, SaveSync> {
+        val saves = tmp.newFolder("$name-saves")
+        return saves to SaveSync(saves, tmp.newFolder("$name-work"), "id-$name", name, File(tmp.root, "$name-known.txt"))
+    }
+
+    @Test
+    fun saveDeletedByTheGameIsRemovedFromTheSyncFileAndOtherDevices() {
+        val (dirA, a) = knownDevice("A")
+        val (dirB, b) = knownDevice("B")
+        save(dirA, "sav.00000001.00000010", "slot", 1_000_000)
+        save(dirA, "sav.00000001.00000011-autosave", "auto", 1_100_000)
+        var (shared, _) = syncOnce(a, null, 2_000_000)
+        shared = syncOnce(b, shared, 2_500_000).first
+        assertTrue(File(dirB, "sav.00000001.00000011-autosave").exists())
+
+        // A plays: a new autosave replaces the old one (new file name), the slot is overwritten
+        File(dirA, "sav.00000001.00000011-autosave").delete()
+        File(dirA, "sav.00000001.00000010").delete()
+        save(dirA, "sav.00000001.00000020-autosave", "auto2", 3_000_000)
+        save(dirA, "sav.00000001.00000021", "slot2", 3_100_000)
+        val ra = a.readRemote { shared.inputStream() }
+        val pa = a.plan(ra)
+        assertEquals(2, pa.deleteRemote.size)
+        assertTrue(pa.download.isEmpty())             // the old saves do not come back as "newer"
+        shared = syncOnce(a, shared, 4_000_000).first
+        assertEquals(setOf("sav.00000001.00000020-autosave", "sav.00000001.00000021"),
+            a.readRemote { shared.inputStream() }.entries.keys)
+        assertFalse(a.plan(a.readRemote { shared.inputStream() }).hasChanges)
+
+        // B: downloads the new ones and drops the deleted ones (does not upload them back)
+        val pb = b.plan(b.readRemote { shared.inputStream() })
+        assertEquals(2, pb.deleteLocal.size)
+        assertTrue(pb.upload.isEmpty())
+        syncOnce(b, shared, 5_000_000)
+        assertEquals(setOf("sav.00000001.00000020-autosave", "sav.00000001.00000021"), dirB.list()!!.toSet())
+    }
+
+    @Test
+    fun withoutSyncHistoryNothingIsDeleted() {
+        val (dirA, a) = knownDevice("A")
+        save(dirA, "sav.00000001.00000010", "x", 1_000_000)
+        val (shared, _) = syncOnce(a, null, 2_000_000)
+        File(dirA, "sav.00000001.00000010").delete()
+        a.forgetKnown()                                // e.g. all saves deleted on purpose
+        val p = a.plan(a.readRemote { shared.inputStream() })
+        assertEquals(1, p.download.size)
+        assertTrue(p.deleteRemote.isEmpty())
+    }
 }

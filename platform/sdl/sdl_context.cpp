@@ -838,6 +838,12 @@ void SDLContext::set_text_input(bool active, bool notify) {
 #endif
 }
 
+/// Scan code given to characters that come as text (soft keyboard). The engine's keyboard handler
+/// (keyboard() in libs/devices.c) remaps characters with a scan code <= 53 as the Czech keyboard
+/// layout of the DOS game (1 -> +, 2 -> e-caron, + and = are dead keys); text that is already final
+/// must skip that, so it gets a scan code above that range that no game key uses.
+static constexpr uint32_t TYPED_CHAR_SCAN = 0x7F;
+
 #ifdef __ANDROID__
 /// UTF-8 text -> characters of the game's font code page (Kamenicky / CP895, Czech letters)
 static std::vector<int> utf8_to_kamenicky(const char *s) {
@@ -1014,7 +1020,10 @@ void SDLContext::event_loop() {
         } else if (e.type == inject_key_event_type()) {
             // key from a touch button that must not be swallowed as text (see the keyboard filter below)
             std::lock_guard _(_mx);
-            _keyboard_queue.push(static_cast<uint32_t>(e.user.code));
+            uint32_t code = static_cast<uint32_t>(e.user.code);
+            // a typed character without a scan code (digits from the soft keyboard)
+            if (code >= 32 && code < 256) code |= TYPED_CHAR_SCAN << 8;
+            _keyboard_queue.push(code);
         } else if (e.type == show_keyboard_event_type()) {
 #ifdef __ANDROID__
             if (e.user.code == 1) {
@@ -1044,7 +1053,8 @@ void SDLContext::event_loop() {
             // arrive as text; convert them to the game's code page (Kamenicky)
             if (_text_input_active) {
                 std::lock_guard _(_mx);
-                for (int ch : utf8_to_kamenicky(e.text.text)) _keyboard_queue.push(static_cast<uint32_t>(ch));
+                for (int ch : utf8_to_kamenicky(e.text.text))
+                    _keyboard_queue.push(static_cast<uint32_t>(ch) | (TYPED_CHAR_SCAN << 8));
             }
 #endif
          } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {

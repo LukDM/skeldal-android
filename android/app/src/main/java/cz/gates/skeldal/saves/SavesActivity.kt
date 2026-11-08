@@ -114,6 +114,8 @@ class SavesActivity : Activity() {
             .setPositiveButton(R.string.saves_delete_do) { _, _ ->
                 background {
                     val (deleted, _) = manager.deleteAll(version())
+                    // deleted on purpose here: the sync file keeps its saves (see saves_delete_confirm)
+                    syncConfig.sync().forgetKnown()
                     ui.post { syncStatus() }
                     getString(R.string.saves_deleted, deleted)
                 }
@@ -212,7 +214,7 @@ class SavesActivity : Activity() {
                             fmt(it.lastSync), it.saves)
                     }.ifEmpty { getString(R.string.sync_no_devices) }
                     getString(R.string.sync_status, name, remote.entries.size, fmt(remote.newest()), devices,
-                        plan.download.size, plan.upload.size, plan.unchanged)
+                        plan.downloadCount, plan.uploadCount, plan.unchanged)
                 }
             } catch (e: ImportException) {
                 getString(R.string.sync_read_failed, name, e.message ?: "")
@@ -243,8 +245,8 @@ class SavesActivity : Activity() {
                         AlertDialog.Builder(this).setMessage(R.string.sync_nothing).setPositiveButton(android.R.string.ok, null).show()
                         return@post
                     }
-                    val down = plan.download.size
-                    val up = plan.upload.size
+                    val down = plan.downloadCount
+                    val up = plan.uploadCount
                     val options = ArrayList<Pair<String, () -> String>>()
                     val write = { p: SaveSync.Plan ->
                         s.apply(remote, p, { syncConfig.openWrite(uri) })
@@ -255,7 +257,7 @@ class SavesActivity : Activity() {
                         getString(R.string.sync_done_download, n)
                     })
                     if (up > 0) options.add(getString(R.string.sync_opt_upload, up) to {
-                        val r = write(plan.copy(download = emptyList()))
+                        val r = write(plan.uploadOnly())
                         getString(R.string.sync_done_upload, r.uploaded)
                     })
                     if (down > 0 && up > 0) options.add(getString(R.string.sync_opt_both, down, up) to {

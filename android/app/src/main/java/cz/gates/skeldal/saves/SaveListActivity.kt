@@ -160,6 +160,8 @@ class SaveListActivity : Activity() {
             .setPositiveButton(R.string.saves_delete_do) { _, _ ->
                 manager.backupNow(version())
                 val n = files.count { it.delete() }
+                // deleted on purpose here: the sync file keeps them (see savelist_delete_note)
+                SyncConfig(this).sync().forgetKnown(files.map { it.name })
                 reload()
                 message(getString(R.string.saves_deleted, n))
             }

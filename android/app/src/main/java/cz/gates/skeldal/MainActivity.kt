@@ -210,7 +210,7 @@ class MainActivity : Activity() {
                 try {
                     val (remote, plan) = sync.check() ?: (null to null)
                     if (remote != null && plan != null) {
-                        if (plan.download.isNotEmpty() && sync.autoDownload) {
+                        if (plan.downloadCount > 0 && sync.autoDownload) {
                             try {
                                 cz.gates.skeldal.saves.SavesActivity.manager(this@MainActivity).backupNow(version)
                                 val n = sync.sync().downloadOnly(remote, plan)

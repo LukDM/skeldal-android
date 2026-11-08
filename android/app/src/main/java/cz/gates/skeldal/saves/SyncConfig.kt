@@ -15,7 +15,11 @@ class SyncConfig(private val context: Context) {
 
     var uri: Uri?
         get() = prefs.getString(KEY_URI, null)?.let { Uri.parse(it) }
-        set(v) { prefs.edit().putString(KEY_URI, v?.toString()).apply() }
+        set(v) {
+            // another sync file: what this device knew about the old one does not apply
+            if (v?.toString() != prefs.getString(KEY_URI, null)) sync().forgetKnown()
+            prefs.edit().putString(KEY_URI, v?.toString()).apply()
+        }
 
     /** Upload the saves to the sync file automatically after the game ends. */
     var autoUpload: Boolean
@@ -40,7 +44,8 @@ class SyncConfig(private val context: Context) {
         get() = (try { Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME) } catch (e: Exception) { null })
             ?.takeIf { it.isNotBlank() } ?: "${Build.MANUFACTURER} ${Build.MODEL}"
 
-    fun sync() = SaveSync(File(context.filesDir, "saves"), context.cacheDir, deviceId, deviceName)
+    fun sync() = SaveSync(File(context.filesDir, "saves"), context.cacheDir, deviceId, deviceName,
+        File(context.filesDir, "sync_known.txt"))
 
     fun openWrite(uri: Uri): OutputStream {
         val cr = context.contentResolver
@@ -59,8 +64,8 @@ class SyncConfig(private val context: Context) {
         val u = uri ?: return 0
         val s = sync()
         val remote = s.readRemote { context.contentResolver.openInputStream(u) }
-        val plan = s.plan(remote).copy(download = emptyList())
-        if (plan.upload.isEmpty()) {
+        val plan = s.plan(remote).uploadOnly()
+        if (plan.uploadCount == 0) {
             remote.dir?.deleteRecursively()
             return 0
         }
