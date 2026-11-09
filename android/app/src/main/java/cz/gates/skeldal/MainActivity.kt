@@ -26,6 +26,7 @@ import cz.gates.skeldal.install.InstallationRepository
 import cz.gates.skeldal.install.SafTreeSource
 import cz.gates.skeldal.install.ZipFileSource
 import cz.gates.skeldal.saves.SyncConfig
+import cz.gates.skeldal.support.SupportLinks
 import cz.gates.skeldal.settings.GameConfigWriter
 import cz.gates.skeldal.settings.SettingsActivity
 import cz.gates.skeldal.settings.SettingsStore
@@ -82,7 +83,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshState()
-        if (busyState == null) reportLastRun()
+        if (busyState == null && !reportLastRun()) maybeShowCampaign()
         cloudAttempts = 0
         ui.removeCallbacks(cloudCheck)
         ui.post(cloudCheck)
@@ -480,9 +481,10 @@ class MainActivity : Activity() {
         return am.runningAppProcesses?.any { it.processName == "$packageName:game" } == true
     }
 
-    private fun reportLastRun() {
+    /** Shows a dialog about a crash / error of the last game; false = nothing to report. */
+    private fun reportLastRun(): Boolean {
         when (val r = crashMonitor.consume(gameProcessAlive())) {
-            CrashMonitor.LastRun.Ok -> {}
+            CrashMonitor.LastRun.Ok -> return false
             CrashMonitor.LastRun.Crashed -> AlertDialog.Builder(this)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.crash_message)
@@ -501,6 +503,7 @@ class MainActivity : Activity() {
                 b.show()
             }
         }
+        return true
     }
 
     private fun showLog() {
@@ -521,17 +524,70 @@ class MainActivity : Activity() {
     }
 
     private fun showInfo() {
-        val version = try {
-            packageManager.getPackageInfo(packageName, 0).versionName
-        } catch (e: Exception) {
-            "?"
+        val version = appVersion()
+        val d = resources.displayMetrics.density
+        val box = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val p = (20 * d).toInt()
+            setPadding(p, (12 * d).toInt(), p, 0)
         }
-        AlertDialog.Builder(this)
+        box.addView(TextView(this).apply {
+            text = getString(R.string.info_text_full, version, engineLine())
+            textSize = 15f
+            setTextColor(android.graphics.Color.parseColor("#FFE8D9A8"))
+        })
+        var dialog: AlertDialog? = null
+        fun button(label: String, action: () -> Unit) {
+            box.addView(Button(this, null, 0, R.style.LauncherButton).apply {
+                text = label
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = (8 * d).toInt() }
+                setOnClickListener { action() }
+            })
+        }
+        box.addView(TextView(this).apply {
+            text = getString(R.string.info_support_title)
+            textSize = 17f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(android.graphics.Color.parseColor("#FFE8D9A8"))
+            setPadding(0, (18 * d).toInt(), 0, 0)
+        })
+        val days = SupportLinks.campaignDaysLeft()
+        if (days >= 0) button(getString(R.string.info_campaign, SupportLinks.daysText(days))) { openUrl(SupportLinks.CAMPAIGN_URL) }
+        button(getString(R.string.info_steam)) { openUrl(SupportLinks.STEAM_URL) }
+        if (SupportLinks.AUTHOR_URL.isNotEmpty()) button(getString(R.string.info_author)) { openUrl(SupportLinks.AUTHOR_URL) }
+        button(getString(R.string.btn_licenses)) { dialog?.dismiss(); showLicenses() }
+        dialog = AlertDialog.Builder(this)
             .setTitle(R.string.app_name)
-            .setMessage(getString(R.string.info_text_full, version, engineLine()))
+            .setView(android.widget.ScrollView(this).apply { addView(box) })
             .setPositiveButton(android.R.string.ok, null)
-            .setNeutralButton(R.string.btn_licenses) { _, _ -> showLicenses() }
             .show()
+    }
+
+    // ---- crowdfunding of Brány Skeldalu 4 (once per app version while it runs) ------------
+
+    private fun maybeShowCampaign() {
+        val days = SupportLinks.campaignDaysLeft()
+        if (days < 0) return
+        val prefs = getSharedPreferences("support", MODE_PRIVATE)
+        val version = appVersion()
+        if (prefs.getString("campaign_shown_version", null) == version) return
+        prefs.edit().putString("campaign_shown_version", version).apply()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.campaign_title)
+            .setMessage(getString(R.string.campaign_text, SupportLinks.daysText(days)))
+            .setPositiveButton(R.string.campaign_open) { _, _ -> openUrl(SupportLinks.CAMPAIGN_URL) }
+            .setNegativeButton(R.string.btn_close, null)
+            .show()
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            message(url)   // no browser: at least show the address
+        }
     }
 
     /** "Engine: …" line; omitted when the version is unknown (e.g. built without git). */

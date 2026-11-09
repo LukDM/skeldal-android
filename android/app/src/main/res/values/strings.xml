@@ -8,6 +8,17 @@
     <string name="btn_settings">Nastavení</string>
     <string name="btn_info">Informace</string>
     <string name="btn_manual">Návod</string>
+    <string name="info_support_title">Podpořte autory</string>
+    <string name="info_campaign">Brány Skeldalu 4 na Startovači (%1$s)</string>
+    <string name="info_steam">Brány Skeldalu na Steamu</string>
+    <string name="info_author">Podpořit autora Android verze</string>
+    <string name="campaign_title">Brány Skeldalu 4</string>
+    <string name="campaign_text">Autor série Brány Skeldalu spustil na Startovači crowdfundingovou kampaň na čtvrtý díl. Pokud se vám hra líbí, můžete jeho vznik podpořit.
+
+Do konce kampaně %1$s.
+
+Odkaz najdete i později v launcheru pod tlačítkem Informace.</string>
+    <string name="campaign_open">Otevřít kampaň</string>
     <string name="manual_title">Návod</string>
     <string name="btn_exit">Ukončit</string>
     <string name="btn_verify">Zkontrolovat soubory</string>
@@ -48,7 +59,7 @@
     <string name="status_data_ready">Herní data nalezena.</string>
     <string name="info_engine">Engine: %1$s · SDL %2$s</string>
     <string name="info_sdl">SDL %1$s</string>
-    <string name="info_text_full">Brány Skeldalu – Android port\nVerze aplikace: %1$s%2$s\n\nZdrojový kód hry: github.com/ondra-novak/gates_of_skeldal (MIT).\nAplikace neobsahuje žádná herní data. Je určena pouze pro uživatele, kteří vlastní originální hru.</string>
+    <string name="info_text_full">Brány Skeldalu – Android port\nVerze aplikace: %1$s%2$s\n\nZdrojový kód hry: github.com/ondra-novak/gates_of_skeldal (MIT).\nAplikace neobsahuje herní data (jen opravu mapy Bílé věže z repozitáře enginu). Je určena pouze pro uživatele, kteří vlastní originální hru.</string>
     <string name="btn_licenses">Licence</string>
     <string name="crash_message">Hra byla při posledním spuštění neočekávaně ukončena.\n\nImportovaná data zůstala zachována.</string>
     <string name="crash_restart">Spustit znovu</string>
