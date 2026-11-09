@@ -40,6 +40,12 @@
             android:label="@string/savelist_title" />
 
         <activity
+            android:name=".ManualActivity"
+            android:exported="false"
+            android:label="@string/manual_title"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden" />
+
+        <activity
             android:name=".saves.SavesActivity"
             android:exported="false"
             android:label="@string/saves_title" />

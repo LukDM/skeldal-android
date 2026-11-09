@@ -85,7 +85,9 @@ public:
         F12,
         backspace,
         mod_key,
-        slow_cursor     ///< while held, the right stick moves the cursor slowly (precise aiming)
+        slow_cursor,    ///< while held, the right stick moves the cursor slowly (precise aiming)
+        pickup_all,     ///< G: pick up everything on the floor into the inventories
+        manual          ///< H: open the walkthrough
     };
 
     static JoystickButton button_from_string(std::string_view s);

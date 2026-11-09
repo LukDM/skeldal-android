@@ -724,12 +724,17 @@ void SDLContext::joystick_handle() {
     }
 }
 
+/// set by game_skip_next_autosave()
+static std::atomic<bool> g_skip_next_autosave{false};
+
 int SDLCALL SDLContext::app_event_watch(void *ctx, SDL_Event *e) {
     auto *me = static_cast<SDLContext *>(ctx);
     switch (e->type) {
-        case SDL_APP_WILLENTERBACKGROUND:
+        case SDL_APP_WILLENTERBACKGROUND: {
             me->_in_background = true;
-            if (me->_autosave_on_background) {
+            // the manual (or another screen of the app) only covers the game: no autosave
+            const bool skip_autosave = g_skip_next_autosave.exchange(false);
+            if (me->_autosave_on_background && !skip_autosave) {
                 // let the game handle F5 (its autosave) first, pause shortly after
                 {
                     std::lock_guard _(me->_mx);
@@ -749,6 +754,7 @@ int SDLCALL SDLContext::app_event_watch(void *ctx, SDL_Event *e) {
                 SDL_Log("App entering background: game paused at %u ms", (unsigned)get_game_tick_count());
             }
             break;
+        }
         case SDL_APP_DIDENTERFOREGROUND:
             me->_in_background = false;
             SDL_Log("App in foreground: game resumed at %u ms", (unsigned)get_game_tick_count());
@@ -819,6 +825,20 @@ void game_inject_key(unsigned int bios_code) {
     ev.type = inject_key_event_type();
     ev.user.code = static_cast<Sint32>(bios_code);
     SDL_PushEvent(&ev);
+}
+
+static void (*g_manual_listener)(void) = nullptr;
+
+void game_set_manual_listener(void (*listener)(void)) {
+    g_manual_listener = listener;
+}
+
+void game_open_manual(void) {
+    if (g_manual_listener) g_manual_listener();
+}
+
+void game_skip_next_autosave(void) {
+    g_skip_next_autosave = true;
 }
 
 void game_text_input(char active) {
@@ -948,6 +968,8 @@ void SDLContext::generate_j_event(int button, char up) {
             case JoystickButton::turn_right: if (!up) cd = SDL_SCANCODE_RIGHT;break;
             case JoystickButton::merge: if (!up) cd = SDL_SCANCODE_INSERT;break;
             case JoystickButton::map: if (!up) cd = SDL_SCANCODE_TAB;break;
+            case JoystickButton::pickup_all: if (!up) cd = SDL_SCANCODE_G;break;
+            case JoystickButton::manual: if (!up) cd = SDL_SCANCODE_H;break;
             case JoystickButton::split1: if (!up) cd = SDL_SCANCODE_1;break;
             case JoystickButton::split2: if (!up) cd = SDL_SCANCODE_2;break;
             case JoystickButton::split3: if (!up) cd = SDL_SCANCODE_3;break;
@@ -1749,6 +1771,8 @@ SDLContext::JoystickButton SDLContext::button_from_string(std::string_view s) {
     if (s=="backspace") return JoystickButton::backspace;
     if (s=="mod_key") return JoystickButton::mod_key;
     if (s=="slow_cursor") return JoystickButton::slow_cursor;
+    if (s=="pickup_all") return JoystickButton::pickup_all;
+    if (s=="manual") return JoystickButton::manual;
     return JoystickButton::disabled;
 
 }

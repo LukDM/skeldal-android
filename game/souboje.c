@@ -2258,6 +2258,7 @@ void programming_keyboard(EVENT_MSG *msg,void **unused)
                  break;
         case 82:group_all();break;
         case 0x18:overlay_map_enabled=!overlay_map_enabled;break;   // O: transparent map over the view
+        case 0x23:game_open_manual();break;                          // H: walkthrough (mobile)
         case 0x31:game_extras^=EX_ALWAYS_MINIMAP;break;              // N: minimap on / off
         case 0x29:console_show(!console_is_visible());break;        // ` (grave): console
         case 0x2E: if (get_control_key_state() && get_shift_key_state()) {

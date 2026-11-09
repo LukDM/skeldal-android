@@ -14,6 +14,11 @@ Jedinou výjimkou je opravená mapa Bílé věže `data/maps/BILA_VEZ.MAP` z rep
 s novým enginem. Před každým spuštěním hry ji launcher nahraje přes importovaný soubor
 (`install/GameFixes.kt`); původní soubor si uloží do `files/fixes_backup/`.
 
+Aplikace obsahuje návod ke hře (`android/app/src/main/assets/navod/`, zdroj v `tools/navod/`).
+Návod a tipy jsou z ceskehry.net a jsou použity se svolením provozovatelů; licence MIT se na ně
+nevztahuje. V launcheru je pod tlačítkem *Návod*, ve hře ho otevře klávesa H, volitelné dotykové
+tlačítko NÁVOD nebo akce gamepadu *Návod*.
+
 ## Požadavky
 
 | Nástroj | Verze |

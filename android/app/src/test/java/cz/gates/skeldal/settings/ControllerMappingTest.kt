@@ -12,7 +12,7 @@ class ControllerMappingTest {
         "disabled", "enter", "space", "ctrl", "lclick", "rclick", "ctrl+lclick", "escape", "up", "down",
         "left", "right", "turn_left", "turn_right", "merge_group", "split1", "split2", "split3", "split4",
         "split5", "split6", "map", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
-        "backspace", "mod_key", "slow_cursor",
+        "backspace", "mod_key", "slow_cursor", "pickup_all", "manual",
     )
 
     @Test

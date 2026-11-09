@@ -74,6 +74,7 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        findViewById<Button>(R.id.btn_manual).setOnClickListener { ManualActivity.open(this) }
         findViewById<Button>(R.id.btn_info).setOnClickListener { showInfo() }
         findViewById<Button>(R.id.btn_exit).setOnClickListener { finishAffinity() }
     }

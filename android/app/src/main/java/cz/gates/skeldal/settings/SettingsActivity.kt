@@ -133,6 +133,8 @@ class SettingsActivity : Activity() {
             cz.gates.skeldal.touch.GameAction.KEYBOARD to "⌨ (klávesnice kdykoli – zapnout / vypnout)",
             cz.gates.skeldal.touch.GameAction.CTRL to "CTRL (zamykací – s klepnutím na portrét rozdělí skupinu)",
             cz.gates.skeldal.touch.GameAction.MERGE to "SLOUČIT (Insert – spojí postavy na jednom políčku)",
+            cz.gates.skeldal.touch.GameAction.PICKUP_ALL to "SEBRAT (G – sebere vše ze země do inventáře)",
+            cz.gates.skeldal.touch.GameAction.MANUAL to "NÁVOD (H – otevře návod)",
             cz.gates.skeldal.touch.GameAction.OVERLAY_MAP to "MAPA+ (O – průhledná mapa přes obraz)",
             cz.gates.skeldal.touch.GameAction.MINIMAP to "MINIMAPA (N – minimapa zapnout / vypnout)",
             cz.gates.skeldal.touch.GameAction.CONSOLE to "KONZOLE (` – konzole s cheaty)",

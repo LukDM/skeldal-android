@@ -1439,6 +1439,8 @@ extern char cfg_autosave_on_quit;
 extern char cfg_save_refresh_name;
 /// [game] auto_pickup: a clicked item goes straight into a free inventory slot
 extern char cfg_auto_pickup;
+/// G: picks up everything on the floor here into the inventories (see inv.c)
+void pick_up_all(void);
 int load_map_automap(char *mapfile);
  /* ^^^ Tato funkce zmeni mapu, bez zmeny grafiky a stavu cele hry.
     Jeji vyuziti je pro zobrazeni automapingu jineho levelu nez aktualniho

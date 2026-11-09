@@ -3,7 +3,7 @@
 Přehled ovládání Android portu: dotyk, gamepad a hardwarová klávesnice. Hra se ovládá stejně
 jako na PC, tedy myší a klávesami. Dotykové ovládání a gamepad tyto vstupy jen napodobují.
 
-Všechno se nastavuje v launcheru v **Nastavení**.
+Všechno se nastavuje v launcheru v **Nastavení**. Návod ke hře najdeš v launcheru pod tlačítkem **Návod**, ve hře ho otevře klávesa H nebo volitelné tlačítko NÁVOD.
 
 ---
 
@@ -46,6 +46,8 @@ Zapínají se v Nastavení → Dotykové ovládání.
 | ⌨ | – | klávesnice kdykoli: zapnout / vypnout |
 | CTRL | Ctrl | **zamykací**: klepnutím se zapne (tlačítko svítí), dalším klepnutím vypne |
 | SLOUČIT | Insert | sloučí do jedné skupiny všechny postavy na jednom políčku |
+| SEBRAT | G | sebere vše ze země (vaše políčko a přední polovina políčka před vámi) do inventáře |
+| NÁVOD | H | otevře návod přes hru, Zpět se vrátí do hry |
 | MAPA+ | O | průhledná mapa přes obraz (Úpravy hry) |
 | MINIMAPA | N | minimapa v rohu zapnout / vypnout (Úpravy hry) |
 | KONZOLE | ` | konzole s příkazy (Úpravy hry) |
@@ -116,6 +118,7 @@ menu na Start.
 
 V mapování jsou navíc akce **Oddělit postavu 1–6**, které jedním tlačítkem přidají postavu
 do skupiny nebo ji z ní odeberou.
+Další akce, které nejsou ve výchozím mapování: **Sebrat vše ze země** a **Návod**.
 
 ---
 
@@ -152,6 +155,8 @@ Vybraná skupina má jména bíle a portréty prosvětlené. Ostatní skupiny ma
 | I | inventář |
 | 1–6 | přidat / odebrat postavu ve skupině |
 | Insert | sloučit skupinu |
+| G | sebrat vše ze země do inventáře |
+| H | návod |
 | **V boji:** F8 / F9 / F10 / F11 / F12 / Backspace | útok / pohyb / výzbroj / útěk / žádná akce / zrušit |
 | O | průhledná mapa |
 | N | minimapa zapnout / vypnout |

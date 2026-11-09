@@ -33,6 +33,8 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
     KEYBOARD(-1, "⌨", false),      // not a key: shows / hides the soft keyboard
     CTRL(113, "CTRL", false),       // KEYCODE_CTRL_LEFT, latched: tap = held until tapped again (Ctrl + tap on a portrait = split the group)
     MERGE(124, "SLOUČIT", false),   // KEYCODE_INSERT: merge all characters standing on one square
+    PICKUP_ALL(-1, "SEBRAT", false), // G: everything on the floor into the inventories
+    MANUAL(-1, "NÁVOD", false),     // not a key: opens the walkthrough over the game
     ;
 
     /** BIOS key code (scan code << 8 | character) put directly into the game's queue, 0 = none. */
@@ -40,6 +42,7 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
         OVERLAY_MAP -> 0x1800   // O (scan code only: not typed as text, e.g. into the console)
         MINIMAP -> 0x3100       // N
         CONSOLE -> 0x2900       // `
+        PICKUP_ALL -> 0x2200    // G
         else -> 0
     }
 
@@ -50,7 +53,7 @@ enum class GameAction(val keyCode: Int, val label: String, val repeats: Boolean)
         /** Buttons shown by default, in this order. */
         val DEFAULT_BUTTONS = listOf(MENU, MAP, ACTION, BATTLE)
         /** Buttons the user can add in the settings. */
-        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, CTRL, MERGE, OVERLAY_MAP, MINIMAP, CONSOLE)
+        val OPTIONAL_BUTTONS = listOf(SAVE, LOAD, INVENTORY, BOOK, SPELLS, REST, SETTINGS, KEYBOARD, CTRL, MERGE, PICKUP_ALL, MANUAL, OVERLAY_MAP, MINIMAP, CONSOLE)
     }
 }
 

@@ -50,6 +50,8 @@ data class ControllerMapping(val normal: List<String>, val withMod: List<String>
             "slow_cursor" to "Pomalý kurzor (držet – přesné míření)",
             "map" to "Mapa",
             "merge_group" to "Spojit skupinu",
+            "pickup_all" to "Sebrat vše ze země",
+            "manual" to "Návod",
             "up" to "Krok vpřed",
             "down" to "Krok vzad",
             "turn_left" to "Otočit vlevo",

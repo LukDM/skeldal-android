@@ -7,6 +7,8 @@
     <string name="btn_manage_files">Správa herních souborů</string>
     <string name="btn_settings">Nastavení</string>
     <string name="btn_info">Informace</string>
+    <string name="btn_manual">Návod</string>
+    <string name="manual_title">Návod</string>
     <string name="btn_exit">Ukončit</string>
     <string name="btn_verify">Zkontrolovat soubory</string>
     <string name="btn_delete_data">Odstranit herní data</string>

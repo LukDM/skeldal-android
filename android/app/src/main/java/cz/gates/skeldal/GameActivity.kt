@@ -84,6 +84,7 @@ class GameActivity : SDLActivity() {
     override fun onDestroy() {
         audioManager.abandonAudioFocusRequest(focusRequest)
         NativeBridge.textInputListener = null
+        NativeBridge.manualListener = null
         super.onDestroy()
     }
 
@@ -143,10 +144,18 @@ class GameActivity : SDLActivity() {
         view.onKeyboardButton = { NativeBridge.nativeShowKeyboard() }
         view.onKeyboardToggle = { NativeBridge.nativeToggleKeyboard() }
         view.onInjectKey = { NativeBridge.nativeInjectKey(it) }
+        view.onManualButton = { openManual() }
+        NativeBridge.manualListener = { openManual() }
         watchKeyboard()
         NativeBridge.textInputListener = { active -> overlay?.textInputActive = active }
         addContentView(view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         overlay = view
+    }
+
+    /** The walkthrough over the game; the game pauses without the autosave and continues after Back. */
+    private fun openManual() {
+        try { NativeBridge.nativeSkipNextAutosave() } catch (e: UnsatisfiedLinkError) { }
+        ManualActivity.open(this)
     }
 
     // Automatic mode: hide the touch controls when a physical gamepad or keyboard is used.

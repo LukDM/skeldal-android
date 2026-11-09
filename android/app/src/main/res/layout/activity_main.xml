@@ -71,6 +71,11 @@
 
         <Button
             style="@style/LauncherButton"
+            android:id="@+id/btn_manual"
+            android:text="@string/btn_manual" />
+
+        <Button
+            style="@style/LauncherButton"
             android:id="@+id/btn_settings"
             android:text="@string/btn_settings" />
 

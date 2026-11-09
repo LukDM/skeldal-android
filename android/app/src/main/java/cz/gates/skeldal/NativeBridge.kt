@@ -23,6 +23,18 @@ object NativeBridge {
     /** Key straight into the game's queue (BIOS code), bypassing the text input filter. */
     @JvmStatic external fun nativeInjectKey(biosCode: Int)
 
+    /** The next pause of the game (app to background) skips the autosave - the manual only covers the game. */
+    @JvmStatic external fun nativeSkipNextAutosave()
+
+    /** Called on the UI thread when the game asks for the walkthrough (H key / gamepad action). */
+    @Volatile var manualListener: (() -> Unit)? = null
+
+    /** Called from native code (game thread) - see open_manual in app_start.cpp. */
+    @JvmStatic
+    fun onOpenManual() {
+        main.post { manualListener?.invoke() }
+    }
+
     /** Called on the UI thread when a game text field becomes active / inactive. */
     @Volatile var textInputListener: ((Boolean) -> Unit)? = null
 

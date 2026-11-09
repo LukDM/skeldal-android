@@ -55,6 +55,8 @@ class TouchOverlayView(
 
     /** Optional always-visible keyboard button (keyboard on / off). */
     var onKeyboardToggle: (() -> Unit)? = null
+    /** The NÁVOD button (opens the walkthrough). */
+    var onManualButton: (() -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private val handler = Handler(Looper.getMainLooper())
@@ -176,6 +178,8 @@ class TouchOverlayView(
         pressed[id] = c
         if (c.action == GameAction.KEYBOARD) {
             onKeyboardToggle?.invoke()
+        } else if (c.action == GameAction.MANUAL) {
+            onManualButton?.invoke()
         } else if (c.action.injectCode != 0) {
             onInjectKey?.invoke(c.action.injectCode)
         } else if (c.action.latched) {

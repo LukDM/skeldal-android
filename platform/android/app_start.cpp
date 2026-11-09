@@ -186,6 +186,27 @@ namespace {
 JavaVM *g_vm = nullptr;
 jclass g_bridge = nullptr;            // cz.gates.skeldal.NativeBridge (global ref)
 jmethodID g_on_text_input = nullptr;  // static void onTextInput(boolean)
+jmethodID g_on_open_manual = nullptr; // static void onOpenManual()
+
+/// Runs [call] with a JNIEnv of the current thread (attaching it for the call if needed).
+template<typename Fn> void with_env(Fn call) {
+    if (!g_vm || !g_bridge) return;
+    JNIEnv *env = nullptr;
+    bool attached = false;
+    if (g_vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        if (g_vm->AttachCurrentThread(&env, nullptr) != JNI_OK) return;
+        attached = true;
+    }
+    call(env);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    if (attached) g_vm->DetachCurrentThread();
+}
+
+/// H key / gamepad action: the launcher opens the walkthrough over the game.
+void open_manual() {
+    if (!g_on_open_manual) return;
+    with_env([](JNIEnv *env) { env->CallStaticVoidMethod(g_bridge, g_on_open_manual); });
+}
 
 /// Tells the Java side that a text field opened / closed (shows the keyboard button).
 void notify_text_input(int active) {
@@ -211,10 +232,12 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     if (c) {
         g_bridge = static_cast<jclass>(env->NewGlobalRef(c));
         g_on_text_input = env->GetStaticMethodID(c, "onTextInput", "(Z)V");
+        g_on_open_manual = env->GetStaticMethodID(c, "onOpenManual", "()V");
         env->DeleteLocalRef(c);
     }
     if (env->ExceptionCheck()) env->ExceptionClear();
     game_set_text_input_listener(notify_text_input);
+    game_set_manual_listener(open_manual);
     return JNI_VERSION_1_6;
 }
 
@@ -234,6 +257,12 @@ Java_cz_gates_skeldal_NativeBridge_nativeKeyboardHidden(JNIEnv *, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_cz_gates_skeldal_NativeBridge_nativeInjectKey(JNIEnv *, jclass, jint bios_code) {
     game_inject_key(static_cast<unsigned int>(bios_code));
+}
+
+/// The manual opens over the game: pause without the autosave.
+extern "C" JNIEXPORT void JNICALL
+Java_cz_gates_skeldal_NativeBridge_nativeSkipNextAutosave(JNIEnv *, jclass) {
+    game_skip_next_autosave();
 }
 
 /// Optional "keyboard" touch button: keyboard on / off anywhere in the game.

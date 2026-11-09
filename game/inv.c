@@ -678,7 +678,7 @@ static char can_auto_pickup(const THUMAN *p)
 /// Puts the item in the hand (picked_item, with the contents of a container) into the inventory of
 /// the selected character, or of another one standing here, who has room for all of it.
 /// If nobody has room, the item stays in the hand like in the original game.
-static void auto_pickup_to_inv(void)
+static void auto_pickup_to_inv(char quiet)
   {
   int i,need=count_items_total(picked_item);
   THUMAN *who=NULL;
@@ -701,8 +701,59 @@ static void auto_pickup_to_inv(void)
         }
      free(picked_item);
      picked_item=NULL;
-     bott_disp_text(text);
+     if (!quiet) bott_disp_text(text);
   }
+  }
+
+/// G key / "SEBRAT VŠE" button: takes everything lying on the current square and the visible part
+/// of the square in front (like clicking each item) into free inventory slots of the characters
+/// standing here. Money, runes and scrolls are taken as usual; what does not fit stays on the floor.
+void pick_up_all(void)
+  {
+  char text[100];
+  int taken=0,i;
+
+  if (picked_item!=NULL || cur_mode!=MD_GAME || battle) return;
+  text[0]=0;
+  for(i=0;i<6;i++)
+     {
+     int sect,idd;
+     if (i<4) {sect=viewsector;idd=i;}
+     else
+        {
+        // the near half of the square in front, the same places a click can reach
+        int id=i-2;
+        if ((map_sides[(viewsector<<2)+viewdir].flags & SD_THING_IMPS) && !(map_sides[(viewsector<<2)+viewdir].oblouk & SD_ITPUSH)) break;
+        sect=map_sectors[viewsector].step_next[viewdir];
+        if (sect==0) break;
+        idd=(id+viewdir)&0x3;
+        }
+     while (1)
+        {
+        pop_item(sect,idd,0,&picked_item);
+        if (picked_item==NULL) break;
+        {
+           char name[32];
+           strncpy(name,glob_items[*picked_item-1].jmeno,sizeof(name)-1);name[sizeof(name)-1]=0;
+           do_items_specs();      // money, runes, scrolls: taken right away
+           if (picked_item!=NULL) auto_pickup_to_inv(1);
+           if (picked_item!=NULL)
+              {
+              // nobody has room: back to the floor, try the other places
+              push_item(sect,idd,picked_item);
+              free(picked_item);
+              picked_item=NULL;
+              break;
+              }
+           taken++;
+           if (text[0]==0) snprintf(text,sizeof(text),"+ %s",name);
+           else if (strlen(text)+strlen(name)+2<sizeof(text)-4) {strcat(text,", ");strcat(text,name);}
+           else if (!strstr(text,"...")) strcat(text," ...");
+        }
+        }
+     }
+  pick_set_cursor();
+  if (taken) bott_disp_text(text);
   }
 
 char pick_item_(int id,int xa,int ya,int xr,int yr)
@@ -790,7 +841,7 @@ char pick_item_(int id,int xa,int ya,int xr,int yr)
         // [game] auto_pickup: the item goes straight into a free inventory slot (Ctrl + click
         // takes it into the hand as before)
         if (picked_item!=NULL && cfg_auto_pickup && cur_mode!=MD_INV && !get_control_key_state())
-           auto_pickup_to_inv();
+           auto_pickup_to_inv(0);
         pick_set_cursor();
         }
      return (picked_item!=NULL);

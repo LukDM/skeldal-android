@@ -133,6 +133,12 @@ void game_toggle_keyboard(void);
 void game_keyboard_hidden(void);
 ///puts a key (BIOS code: scan code << 8 | character) straight into the game's keyboard queue
 void game_inject_key(unsigned int bios_code);
+///opens the walkthrough (mobile: the launcher's manual screen over the game); no-op without a listener
+void game_open_manual(void);
+///platform callback for game_open_manual (called on the game thread)
+void game_set_manual_listener(void (*listener)(void));
+///the next "app goes to background" pauses the game without the autosave (e.g. the manual opens)
+void game_skip_next_autosave(void);
 /// Mutes / unmutes the game audio (e.g. Android audio focus). Thread safe, never blocks:
 /// the change is applied by the SDL event loop.
 void game_set_audio_muted(char muted);
