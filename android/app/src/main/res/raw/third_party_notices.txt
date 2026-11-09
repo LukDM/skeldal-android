@@ -35,4 +35,10 @@ Copyright The Android Open Source Project. Licence: Apache 2.0.
 LLVM libc++ (součást Android NDK, staticky přilinkovaná)
 Licence: Apache 2.0 with LLVM Exceptions.
 
+Písmo Almendra (v návodu) – https://fonts.google.com/specimen/Almendra
+Copyright (c) 2011-2012 Ana Sanfelippo, Reserved Font Name "Almendra". Licence: SIL Open Font License 1.1 (https://openfontlicense.org).
+
+Návod a tipy v aplikaci – www.ceskehry.net (návod: Score, úpravy: Majel007, skeny map: dungeony.cz,
+tipy a triky: Paladin). Použito se svolením provozovatelů ceskehry.net; nevztahuje se na ně licence MIT.
+
 Plné texty licence Apache 2.0: https://www.apache.org/licenses/LICENSE-2.0
