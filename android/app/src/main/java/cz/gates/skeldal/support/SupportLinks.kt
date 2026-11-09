@@ -16,8 +16,8 @@ object SupportLinks {
     /** The game this port runs (current PC release) on Steam. */
     const val STEAM_URL = "https://store.steampowered.com/app/3533830/Br%C3%A1ny_Skeldalu/"
 
-    /** Support for the author of the Android port; empty = no button. */
-    const val AUTHOR_URL = ""
+    /** Support for the author of the Android port (Ko-fi); empty = no button. */
+    const val AUTHOR_URL = "https://ko-fi.com/rex99997488"
 
     /** Whole days until the last day like Startovač counts them (0 = the last day), -1 = over. */
     fun campaignDaysLeft(now: ZonedDateTime = ZonedDateTime.now(ZONE)): Int {
