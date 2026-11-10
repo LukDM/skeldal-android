@@ -36,8 +36,8 @@ android {
         // std::filesystem and modern NDK APIs available without workarounds.
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.2.0"
+        versionCode = 4
+        versionName = "0.4.0"
 
         // engine version = git revision of the repository (as the desktop build shows it)
         buildConfigField("String", "ENGINE_VERSION", "\"${engineVersion()}\"")
