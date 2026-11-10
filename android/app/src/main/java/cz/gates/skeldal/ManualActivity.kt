@@ -18,6 +18,8 @@ import android.webkit.WebViewClient
 class ManualActivity : Activity() {
 
     private lateinit var web: WebView
+    /** the reading position is restored only once, after the first load of the page */
+    private var restored = false
     private val prefs by lazy { getSharedPreferences("manual", Context.MODE_PRIVATE) }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -32,7 +34,9 @@ class ManualActivity : Activity() {
             isFocusable = true
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String) {
-                    if (savedInstanceState != null) return
+                    // also called after a jump to a chapter (#anchor) - must not scroll back then
+                    if (restored || savedInstanceState != null) return
+                    restored = true
                     // back to where the reader was (fraction of the page height)
                     val f = prefs.getFloat(KEY_POS, 0f)
                     if (f > 0f) view.postDelayed({

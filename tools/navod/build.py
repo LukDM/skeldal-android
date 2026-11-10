@@ -166,7 +166,7 @@ lis = []
 for a, t, subs in chapters:
     sub = ('<ul class="sub">' + ''.join(f'<li><a href="#{sa}">{st}</a></li>' for sa, st in subs) + '</ul>') if subs else ''
     lis.append(f'<li><a href="#{a}">{t}</a>{sub}</li>')
-html_toc = '<nav class="toc"><b>Obsah</b><ul>' + ''.join(lis) + '</ul></nav>'
+html_toc = '<nav class="toc" id="obsah"><b>Obsah</b><ul>' + ''.join(lis) + '</ul></nav>'
 body = body.replace('<!--TOC-->', html_toc)
 
 CSS = """
@@ -199,11 +199,13 @@ th{color:#2A2927;background:#E9DCAE}
 .toc ul{margin:6px 0 0 18px}.toc li{margin:3px 0}
 .toc .sub{columns:2;column-gap:20px;margin:4px 0 4px 16px}
 .toc .sub li{break-inside:avoid}
+.top{position:fixed;right:14px;bottom:14px;background:#E9DCAE;color:#2A2927;text-decoration:none;
+  font-weight:700;padding:8px 12px;border-radius:20px;opacity:.85;font-size:15px}
 @media (max-width:420px){body{font-size:16px}.toc .sub{columns:1}}
 """
 page = ('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>Brány Skeldalu – návod</title><style>' + CSS + '</style></head><body>\n'
-        + body + '\n</body></html>')
+        + body + '\n<a class="top" href="#obsah">↑ Obsah</a>\n</body></html>')
 open(os.path.join(outdir, 'index.html'), 'w', encoding='utf-8').write(page)
 print('app page written to', outdir)
